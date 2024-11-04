@@ -1,0 +1,14 @@
+{
+  "name": "access_data_email",
+  "version": "1.0.0",
+  "description": "Automatic email to data custodian informing about submitted request to access externally hosted data",
+  "main": "serverEmailAutomat.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node serverEmailAutomat.js"
+  },
+  "keywords": [],
+  "author": "Maya Kobchenko",
+  "license": "ISC"
+}

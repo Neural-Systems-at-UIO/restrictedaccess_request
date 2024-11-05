@@ -1,12 +1,12 @@
 import express from 'express';
-import bodyParser from 'body-parser';
-import { fetchToken } from './tokenFetcher.js';
+import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
 import {fetchSubmission,fetchAnswers} from './fetchNettskjemaData.js';
-import {getRequestOptions} from './tryKgAuthentication.js';
+import {getRequestOptions} from './kgAuthentication.js';
 
 const app = express();
+app.use(express.json());
 const port = 4000;
 const tokenStore = {
     tokenNettskjema: null,
@@ -36,6 +36,12 @@ app.get('/', async (req, res) => {
     }
 });
 
+app.post('/test', (req, res) => {
+    const jsonData = req.body;
+    console.log(jsonData);
+    res.json({ message: 'Data received successfully', data: jsonData });
+});
+
 app.get('/nettskjema', async (req, res) => {
     try {
         if (!tokenStore.tokenNettskjema) {
@@ -52,7 +58,6 @@ app.get('/nettskjema', async (req, res) => {
     }
 });
 
-app.use(bodyParser.json());
 app.post('/webhook', async (req, res) => {
     const event = req.body.event;
     console.log('webhook is fired:', event);

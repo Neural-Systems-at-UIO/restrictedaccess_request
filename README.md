@@ -9,3 +9,9 @@ To launch the server:
 ```
 $ npm start
 ```
+
+In development mode:
+
+```
+$ npm run dev
+```

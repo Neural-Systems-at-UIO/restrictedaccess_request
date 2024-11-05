@@ -1,4 +1,5 @@
 import express from 'express';
+import cron from 'node-cron';
 import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
@@ -47,9 +48,6 @@ app.get('/nettskjema', async (req, res) => {
         if (!tokenStore.tokenNettskjema) {
             throw new Error('Token for nettskjema not available');
         }
-        //to fetch description of nettskjema fields 
-        //https://api.nettskjema.no/v3/form/127835/definition
-        //'Accept': '*/*'
         const submissionId = 33139391;
         const data = await fetchSubmission(submissionId, tokenStore.tokenNettskjema);
         res.status(200).json(data);
@@ -62,22 +60,36 @@ app.post('/webhook', async (req, res) => {
     const event = req.body.event;
     console.log('webhook is fired:', event);
     const data = req.body.data;
-    const contactPersonName = data.name;
-    const recipientEmail = data.email;
     const submissionId = data.submission_id;
 
     try {
-        sendEmailOnWebhook(contactPersonName, recipientEmail);
         if (!tokenStore.tokenNettskjema) {
             throw new Error('Token to access nettskjema not available');
         }
+        if (!tokenStore.tokenKG) {
+            throw new Error('Token to access KG not available');
+        }
         const submissionData = await fetchSubmission(submissionId, tokenStore.tokenNettskjema);
-        console.log('submission meatdata:', submissionData['submissionMetadata']);
+        const datasetID = await fetchAnswers(submissionData);
+        console.log(datasetID);
+
+        const respondentName = submissionData['submissionMetadata']['person']['name'];
+        const respondentEmail = submissionData['submissionMetadata']['person']['email'];
+        //send email:
+        sendEmailOnWebhook(respondentName, respondentEmail);
+
+
     } catch (error) {
         console.error('Error sending email:', error);
     };
-
+// send a reply about a webhook fired successfully 
     res.status(200).json({ status: 'success', received: data });
+});
+
+// Schedule the token refresh to run daily at midnight
+cron.schedule('0 0 * * *', async () => {
+    console.log('Running a task to fetch token at midnight');
+    await initializeTokens();
 });
 
 app.listen(port, async () => {

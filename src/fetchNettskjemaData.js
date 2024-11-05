@@ -1,8 +1,9 @@
 //put here nettskjema api endpoints to fetch data
 
 import fetch from 'node-fetch';
+import {NETTSKJEMA_QUESTIONS_ID} from './constants.js';
 
-async function fetchSubmission(submissionId, tokenNettskjema) {
+export async function fetchSubmission(submissionId, tokenNettskjema) {
     const response = await fetch(`https://api.nettskjema.no/v3/form/submission/${submissionId}`, {
         method: 'GET',
         headers: {
@@ -13,20 +14,15 @@ async function fetchSubmission(submissionId, tokenNettskjema) {
     if (!response.ok) {
         throw new Error(`Failed to fetch submission data`);
     }
-    const data = await response.json();
-    return data;
+    const submissionData = await response.json();
+    return submissionData;
 }
 
-async function fetchAnswers() {
-    const response = await fetch('https://api.example1.com/data');
-    if (!response.ok) {
-        throw new Error(`Failed to fetch from API One: ${response.statusText}`);
-    }
-    const data = await response.json();
-    return data;
-}
+export async function fetchAnswers(submissionData) {
+    const elementId = NETTSKJEMA_QUESTIONS_ID['DatasetID'];
+    const result = submissionData['answers'].find(item => item.elementId === elementId);
+    const datasetID = result['textAnswer'];
+    //console.log(submissionData['submissionMetadata']);
 
-export {
-    fetchSubmission,
-    fetchAnswers
-};
+    return datasetID;
+}

@@ -3,13 +3,16 @@ import 'dotenv/config';
 import nodemailer from 'nodemailer';
 
 const gmail_pass = process.env.GMAIL_PASS;
+const gmail_user = process.env.GMAIL_USER;
+const senderEmail = process.env.GMAIL_SENDER;
+const tryEmail = process.env.GMAIL_MAIL;
 
 const emailGmail = {
     host: "smtp.gmail.com",
     port: 587, // Use 465 for SSL
     secure: false, // Use true for SSL
     auth: {
-      user: "kobchenko.maya@gmail.com",
+      user: gmail_user,
       pass: gmail_pass
     },
     tls: {
@@ -25,8 +28,8 @@ export async function sendEmailOnWebhook(contactPersonName, recipientEmail) {
     Please confirm you email address: ${recipientEmail} 
     `;
     const mailOptions = {
-        from: `"Maya Kobchenko" <kobchenko.maya@gmail.com>`, // Sender address
-        to: 'maya.kobchenko@medisin.uio.no',                      // Recipient address
+        from: `${senderEmail}`, // Sender address
+        to: `${tryEmail}`,                      // Recipient address
         subject: 'data access request',                                 // Subject line
         //text: 'Hello, I am very glad that I sent you an email.',                             // Plain text body
         html: htmlContent                      // HTML body

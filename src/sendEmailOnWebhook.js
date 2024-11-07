@@ -28,9 +28,9 @@ export async function sendEmailOnWebhook(contactPersonName, recipientEmail) {
     Please confirm you email address: ${recipientEmail} 
     `;
     const mailOptions = {
-        from: `${senderEmail}`, // Sender address
-        to: `${tryEmail}`,                      // Recipient address
-        subject: 'data access request',                                 // Subject line
+        from: senderEmail, // Sender address
+        to: tryEmail,                      // Recipient address
+        subject: 'dataset access request',                                 // Subject line
         //text: 'Hello, I am very glad that I sent you an email.',                             // Plain text body
         html: htmlContent                      // HTML body
     };

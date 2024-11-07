@@ -19,10 +19,21 @@ export async function fetchSubmission(submissionId, tokenNettskjema) {
 }
 
 export async function fetchAnswers(submissionData) {
-    const elementId = NETTSKJEMA_QUESTIONS_ID['DatasetID'];
-    const result = submissionData['answers'].find(item => item.elementId === elementId);
+    const datasetElementId = NETTSKJEMA_QUESTIONS_ID['DatasetID'];
+    let result;
+    try{
+        if (!submissionData || !Array.isArray(submissionData['answers'])) {
+            throw new Error("Invalid submission data or missing answers");
+        }
+        result = submissionData['answers'].find(item => item.elementId === datasetElementId);
+        if (!result) {
+            throw new Error("DatasetID not found in nettskjema");
+        }
+    }catch (error) {
+        console.error('Could not find dataset version id in the nettskjema:', error);
+        throw(error);
+    };    
     const datasetID = result['textAnswer'];
-    //console.log(submissionData['submissionMetadata']);
 
     return datasetID;
 }

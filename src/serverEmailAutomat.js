@@ -3,8 +3,9 @@ import cron from 'node-cron';
 import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
-import {fetchSubmission,fetchAnswers} from './fetchNettskjemaData.js';
+import {fetchSubmission, fetchAnswers} from './fetchNettskjemaData.js';
 import {getRequestOptions} from './kgAuthentication.js';
+import {fetchKGjson} from './fetchKGdataset.js';
 
 const app = express();
 app.use(express.json());
@@ -37,11 +38,11 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.post('/test', (req, res) => {
+/*app.post('/test', (req, res) => {
     const jsonData = req.body;
     console.log(jsonData);
     res.json({ message: 'Data received successfully', data: jsonData });
-});
+});*/
 
 app.get('/nettskjema', async (req, res) => {
     try {
@@ -71,7 +72,19 @@ app.post('/webhook', async (req, res) => {
         }
         const submissionData = await fetchSubmission(submissionId, tokenStore.tokenNettskjema);
         const datasetID = await fetchAnswers(submissionData);
-        console.log(datasetID);
+        console.log('datasetID:', datasetID);
+        if (!datasetID) {
+            throw new Error('Could not fetch dataset id from nettskjema');
+        }
+        const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
+        try{
+            const dataKG = await fetchKGjson(queryID, datasetID);
+            console.log('we managed to fetch data:', dataKG);
+            console.log(dataKG['data']);
+        }catch (error) {
+            console.error('Error fetching instances from KG.', error);
+            throw error;
+        }
 
         const respondentName = submissionData['submissionMetadata']['person']['name'];
         const respondentEmail = submissionData['submissionMetadata']['person']['email'];
@@ -86,9 +99,9 @@ app.post('/webhook', async (req, res) => {
     res.status(200).json({ status: 'success', received: data });
 });
 
-// Schedule the token refresh to run daily at midnight
-cron.schedule('0 0 * * *', async () => {
-    console.log('Running a task to fetch token at midnight');
+// Schedule the token refresh every hour
+cron.schedule('0 * * * *', async () => {
+    console.log('Running a task to fetch token every hour');
     await initializeTokens();
 });
 

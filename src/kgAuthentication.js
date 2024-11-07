@@ -9,16 +9,21 @@ export async function getRequestOptions() {
     let token = await getTokenFromServiceAccount(clientSecret)
 
     const requestHeader = { 
+        method: 'GET',
         Accept: "*/*", 
         Authorization: "Bearer " + token, 
-        'User-Agent': "python-requests/2.25.0", 
-        "Accept-Encoding": "gzip, deflate", 
-        'Connection': 'keep-alive' };
+        //gzip: true,
+        //'User-Agent': "python-requests/2.25.0",
+        'Content-Type': 'application/json',
+        'Content-Encoding': 'gzip, deflate',
+        'Transfer-Encoding': 'chunked',
+        'Connection': 'keep-alive'
+    };
         
     const requestOptions = {headers: requestHeader};
     return requestOptions;
 }
-
+        
 export async function getTokenFromServiceAccount(clientSecret) {
 
     let endpointURL = "https://iam.ebrains.eu/auth/realms/hbp/protocol/openid-connect/token";

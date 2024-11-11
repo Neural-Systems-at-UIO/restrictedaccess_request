@@ -6,18 +6,19 @@ const clientSecret = process.env.WIZARD_OIDC_CLIENT_SECRET;
 
 export async function getRequestOptions() {
 
-    let token = await getTokenFromServiceAccount(clientSecret)
+    let token = await getTokenFromServiceAccount(clientSecret);
+    //console.log('KG token:', token);
 
     const requestHeader = { 
-        method: 'GET',
+        //method: 'GET',
         Accept: "*/*", 
         Authorization: "Bearer " + token, 
         //gzip: true,
         //'User-Agent': "python-requests/2.25.0",
-        'Content-Type': 'application/json',
-        'Content-Encoding': 'gzip, deflate',
-        'Transfer-Encoding': 'chunked',
-        'Connection': 'keep-alive'
+        //'Content-Type': 'application/json',
+        //'Content-Encoding': 'gzip, deflate',
+        //'Transfer-Encoding': 'chunked',
+        //'Connection': 'keep-alive'
     };
         
     const requestOptions = {headers: requestHeader};

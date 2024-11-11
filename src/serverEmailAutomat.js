@@ -24,7 +24,7 @@ const initializeTokens = async () => {
         console.error('Error fetching tokens:', error);
     }
 };
-
+//console.log(tokenStore.tokenKG);
 async function mainAppPage() {
     return htmlPageContent;
 }

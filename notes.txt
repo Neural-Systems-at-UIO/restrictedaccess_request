@@ -1,0 +1,13 @@
+https://docs.kg.ebrains.eu/8387ccd27a186dea3dd0b949dc528842/queryAPI_basic.html
+
+https://www.npmjs.com/package/@ebrains/kg-core?activeTab=code
+
+sdk
+https://github.com/HumanBrainProject/kg-core-sdks?tab=readme-ov-file
+
+https://javascript.info/promise-api
+
+https://developer.mozilla.org/en-US/docs/Web/JavaScript
+
+fetch request example 
+https://github.com/mdn/dom-examples/blob/main/fetch/fetch-request/index.html

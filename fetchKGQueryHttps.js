@@ -3,8 +3,8 @@
 //import { promises as fs } from 'fs';
 //import pako from 'pako';
 import {getRequestOptions} from './src/kgAuthentication.js';
-//import {decodeStream} from './src/bufferStream.js';
-//import {fetchChuncks} from './src/fetchChunks.js';
+import {decodeStream} from './src/bufferStream.js';
+import {fetchChuncks} from './src/fetchChunks.js';
 //import { gunzip } from 'zlib';
 //import { promisify } from 'util';
 //import { Buffer } from 'buffer';
@@ -19,7 +19,41 @@ async function fetchInstance(apiQueryUrl, requestOptions) {
             requestOptions,                       // Replace with your API's path
             method: 'GET'
           };
-        //console.log(options);
+        console.log(options);
+
+        https.get(options, (res) => {
+        let responseData = [];
+        const contentType = res.headers['content-type'];
+        const isBinaryContent = contentType && ['application/octet-stream', 'image/jpeg', 'image/png', 'application/pdf'].some(type => contentType.includes(type));
+        
+        console.log(`Content-Type: ${contentType}`);
+        
+        if (isBinaryContent) {
+            console.log('The response is likely a binary stream.');
+        } else {
+            console.log('The response does not appear to be a binary stream.');
+        }
+        
+        res.on('data', (chunk) => {
+            responseData.push(chunk);
+            console.log(`Received chunk of size: ${chunk.length}`);
+        });
+        
+        res.on('end', () => {
+            const buffer = Buffer.concat(responseData);
+            if (isBinaryContent) {
+            console.log('Binary data received:', buffer);
+            } else {
+            console.log('Textual data received:', buffer.toString('utf8'));
+            }
+        });
+        
+        }).on('error', (e) => {
+        console.error(`Request error: ${e.message}`);
+        });
+          
+
+        
 
         const response = await fetch(apiQueryUrl, requestOptions);
         if (!response.ok) {
@@ -29,14 +63,10 @@ async function fetchInstance(apiQueryUrl, requestOptions) {
         //check response headers    
         console.log('Transfer-Encoding query:', response.headers.get('transfer-encoding'));
         console.log('Content-Type query', response.headers.get('Content-Type') );
-        //console.log('Response Headers query:', response.headers.raw());
+        console.log('Response Headers query:', response.headers.raw());
         console.log("response type query =", response.type); 
         console.log('query content encoding:', response.headers.get('content-encoding'));
         //console.log('Raw response:', response ); 
-        const text = await response.text(); // Log raw text to see before parsing JSON
-        console.log('Raw response text:', text);
-        const data = JSON.parse(text);
-        console.log('Complete JSON response:', data);
 
         if (response.body && typeof response.body.getReader === 'function') {
             console.log('response.body is a ReadableStream');}
@@ -47,8 +77,7 @@ async function fetchInstance(apiQueryUrl, requestOptions) {
         //const reader = stream.getReader();
         //const decoder = new TextDecoder();
         //const data = await fetchChuncks(reader);
-
-        //const data = await response.json();
+        const data = await response.json();
         return data;
         } catch (error) {
             console.error('Error fetching json from KG api', error);
@@ -69,7 +98,7 @@ export async function fetchKGjson(queryID, datasetID) {
         //console.log('request headers:', requestOptions);
         //console.log(queryUrl);
         const data = await fetchInstance(queryUrl, requestOptions);
-        //console.log('response', data);
+        //console.log(data);
         results.push(data);
     } catch (error) {
         console.error(`Error fetching instance from KG`, error);

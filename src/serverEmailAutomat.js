@@ -1,29 +1,32 @@
 import express from 'express';
 import cron from 'node-cron';
-import 'dotenv/config';
 import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
 import {fetchSubmission, fetchAnswers} from './fetchNettskjemaData.js';
 import {getRequestOptions} from './kgAuthentication.js';
 import {fetchKGjson} from './fetchKGdataset.js';
+import dotenv from 'dotenv';
+dotenv.config(); //not sure that this is needed
 
 const app = express();
 app.use(express.json());
 const port = 4000;
+
 //use my ebrain account for testing
-//dotenv.config();  //not sure that this is needed
 const maya_token = process.env.MAYA_EBRAIN_TOKEN;
 const token_maya = "Bearer " + maya_token;
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 myHeaders.append("Authorization", token_maya);    
 myHeaders.append("Accept", '*/*');
+const mayaHeaders = {headers: myHeaders};
 
 const tokenStore = {
     tokenNettskjema: null,
     tokenKG: null
 };
+
 const initializeTokens = async () => {
     try {
         const tokenNettskjema = await fetchToken();
@@ -34,7 +37,7 @@ const initializeTokens = async () => {
         console.error('Error fetching tokens:', error);
     }
 };
-//a simple front end page jsut to see that app is working
+//a simple front end page just to see that app is working
 async function mainAppPage() {
     return htmlPageContent;
 }
@@ -48,12 +51,14 @@ app.get('/', async (req, res) => {
     }
 });
 
+// to test remotely without seeing the front page
 /*app.post('/test', (req, res) => {
     const jsonData = req.body;
     console.log(jsonData);
     res.json({ message: 'Data received successfully', data: jsonData });
 });*/
 
+//to check the response from nettskjema
 app.get('/nettskjema', async (req, res) => {
     try {
         if (!tokenStore.tokenNettskjema) {
@@ -66,7 +71,7 @@ app.get('/nettskjema', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
+//the main endpoint
 app.post('/webhook', async (req, res) => {
     const event = req.body.event;
     console.log('webhook is fired:', event);
@@ -86,12 +91,13 @@ app.post('/webhook', async (req, res) => {
         if (!datasetID) {
             throw new Error('Could not fetch dataset id from nettskjema');
         }
-        //we created a query manually in KG editor 
+        //we created a query manually in KG editor named = fetch_data_custodian_info
         const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
+        //console.log(myHeaders);
         try{
-            const dataKG = await fetchKGjson(queryID, datasetID);
+            const requestOptions = await getRequestOptions();
+            const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders);
             console.log('we managed to fetch data:', dataKG);
-            console.log(dataKG['data']);
         }catch (error) {
             console.error('Error fetching instances from KG.', error);
             throw error;

@@ -3,7 +3,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 
-// Load environment variables from .env file
 dotenv.config();
 
 const clientId = process.env.NETTSKJEMA_CLIENT_ID;

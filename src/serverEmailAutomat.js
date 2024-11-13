@@ -1,5 +1,6 @@
 import express from 'express';
 import cron from 'node-cron';
+import 'dotenv/config';
 import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
@@ -10,6 +11,15 @@ import {fetchKGjson} from './fetchKGdataset.js';
 const app = express();
 app.use(express.json());
 const port = 4000;
+//use my ebrain account for testing
+//dotenv.config();  //not sure that this is needed
+const maya_token = process.env.MAYA_EBRAIN_TOKEN;
+const token_maya = "Bearer " + maya_token;
+const myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", token_maya);    
+myHeaders.append("Accept", '*/*');
+
 const tokenStore = {
     tokenNettskjema: null,
     tokenKG: null
@@ -24,7 +34,7 @@ const initializeTokens = async () => {
         console.error('Error fetching tokens:', error);
     }
 };
-//console.log(tokenStore.tokenKG);
+//a simple front end page jsut to see that app is working
 async function mainAppPage() {
     return htmlPageContent;
 }
@@ -76,6 +86,7 @@ app.post('/webhook', async (req, res) => {
         if (!datasetID) {
             throw new Error('Could not fetch dataset id from nettskjema');
         }
+        //we created a query manually in KG editor 
         const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
         try{
             const dataKG = await fetchKGjson(queryID, datasetID);

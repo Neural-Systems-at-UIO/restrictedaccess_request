@@ -77,7 +77,12 @@ app.post('/webhook', async (req, res) => {
     console.log('webhook is fired:', event);
     const data = req.body.data;
     const submissionId = data.submission_id;
-
+    //we created a query manually in KG editor named = fetch_data_custodian_info
+    const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
+    //this is by default the id of the dataset version
+    //data custodian (if empty, not defined - means that the data custodian is the same as for the dataset)
+    //check data set version field custodian if empty?
+    //if yes, fetch linked dataset id --> get custodian
     try {
         if (!tokenStore.tokenNettskjema) {
             throw new Error('Token to access nettskjema not available');
@@ -87,40 +92,44 @@ app.post('/webhook', async (req, res) => {
         }
         const submissionData = await fetchSubmission(submissionId, tokenStore.tokenNettskjema);
         const datasetID = await fetchAnswers(submissionData);
-        console.log('datasetID:', datasetID);
+        //console.log('datasetID:', datasetID);
         if (!datasetID) {
             throw new Error('Could not fetch dataset id from nettskjema');
+        } 
+        //const requestOptions = await getRequestOptions();
+        const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders);
+        //console.log('we managed to fetch data:', dataKG[0]['data'][0]);
+        const custodianDatasetVersion = dataKG[0]['data'][0]['custodian'];
+        //console.log('custodian of the dataset version to check if empty:', custodianDatasetVersion);
+        let nameCustodian;
+        let surnameCustodian;
+        let emailCustodian;
+        if (custodianDatasetVersion.length === 0) {
+            const datasetCustodian = dataKG[0]['data'][0]['dataset'][0]['custodian'];  
+            //custodian can be organization, consorcium or person, we need person type             
+            const foundPerson = datasetCustodian.find(obj => obj.contactInformation.length !== 0);
+            console.log('Data custodian:', foundPerson);
+            nameCustodian = foundPerson['givenName'];
+            surnameCustodian = foundPerson['familyName'];
+            emailCustodian = foundPerson['contactInformation'][0];
+            //console.log('custodians name:', nameCustodian, surnameCustodian);
+            //console.log('email of the data custodian:', emailCustodian)
+        } else {
+            console.log('take the custodian of the dataset version');
+            //contact info for organization is empty
+            const foundPersonVersion = custodianDatasetVersion.find(obj => obj.contactInformation.length !== 0);
+            console.log('Data custodian:', foundPersonVersion);
+            nameCustodian = foundPersonVersion['givenName'];
+            surnameCustodian = foundPersonVersion['familyName'];
+            emailCustodian = foundPersonVersion['contactInformation'][0];              
         }
-        //we created a query manually in KG editor named = fetch_data_custodian_info
-        const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
-        //this is by default the id of the dataset version
-        //data custodian (if empty, not defined - means that the data custodian is the same as for the dataset)
-        //check data set version field custodian if empty?
-        //if yes, fetch linked dataset id --> get custodian 
-        try{
-            const requestOptions = await getRequestOptions();
-            const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders);
-            console.log('we managed to fetch data:', dataKG[0]['data'][0]);
-
-            const custodianDatasetVersion = dataKG[0]['data'][0]['custodian'];
-            console.log('custodian of the dataset version to check if empty:', custodianDatasetVersion);
-            if (custodianDatasetVersion.length === 0) {
-                const datasetCustodian = dataKG[0]['data'][0]['dataset'][0]['custodian'];               
-                const foundObject = datasetCustodian.find(obj => obj.contactInformation.length !== 0);
-                console.log('I found the email of the custodian:', foundObject);
-                console.log(foundObject['givenName']);
-            } else {
-                console.log('take the custodian of the dataset version');
-            }
-        }catch (error) {
-            console.error('There is a problem somewhere', error);
-            throw error;
-        }
+            //return {emailCustodian, nameCustodian, surnameCustodian};
 
         const respondentName = submissionData['submissionMetadata']['person']['name'];
         const respondentEmail = submissionData['submissionMetadata']['person']['email'];
         //send email:
-        sendEmailOnWebhook(respondentName, respondentEmail);
+        console.log('email custodian', emailCustodian);
+        sendEmailOnWebhook(respondentName, respondentEmail, nameCustodian, surnameCustodian, emailCustodian['email']);
 
 
     } catch (error) {

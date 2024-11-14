@@ -24,18 +24,35 @@ try {
     const response_wizard = await fetch (url, {headers: wizardHeaders});
 
     const json = await response.json();
-    console.log('complete response');
-    console.log(json['data'][0]);
-    console.log('dataset');
-    console.log(json['data'][0]['dataset'][0]);
-    console.log('email of the data custodian');
-    console.log(json['data'][0]['dataset'][0]['custodian'][1]['contactInformation'][0]);
-    console.log(json['data'][0]['id']);
-    console.log('json wizard');
+    //console.log('complete response');
+    //console.log(json['data'][0]);
 
-    const json_wizard = await response_wizard.json();
-    console.log(json_wizard);
-    console.log(json_wizard['data']);
+    const custodianDatasetVersion = json['data'][0]['custodian'];
+    console.log('custodian of the dataset version to check if empty:', custodianDatasetVersion);
+    if (custodianDatasetVersion.length === 0) {
+        console.log('the dataset version does not have a separate custodian');
+        //const datasetMain = json['data'][0]['dataset'][0];
+        //console.log('dataset');
+        //console.log(datasetMain);
+        const datasetCustodian = json['data'][0]['dataset'][0]['custodian'];               
+        //console.log('custodian of the dataset', datasetCustodian);
+        const foundObject = datasetCustodian.find(obj => obj.contactInformation.length !== 0);
+        console.log('I found the email of the custodian:', foundObject);
+        console.log(foundObject['givenName']);
+    } else {
+        console.log('take the custodian of the dataset version');
+    }
+
+
+    //console.log('email of the dataset custodian');
+    //console.log(json['data'][0]['dataset'][0]['custodian'][1]['contactInformation'][0]);
+
+    //console.log(json['data'][0]['id']);
+
+    //console.log('json wizard');
+    //const json_wizard = await response_wizard.json();
+    //console.log(json_wizard);
+    //console.log(json_wizard['data']);
 } catch (error) {
     console.error(error.message);
 }

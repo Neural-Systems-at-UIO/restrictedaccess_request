@@ -7,7 +7,7 @@ import {fetchSubmission, fetchAnswers} from './fetchNettskjemaData.js';
 import {getRequestOptions} from './kgAuthentication.js';
 import {fetchKGjson} from './fetchKGdataset.js';
 import dotenv from 'dotenv';
-dotenv.config(); //not sure that this is needed
+dotenv.config(); 
 
 const app = express();
 app.use(express.json());
@@ -52,11 +52,11 @@ app.get('/', async (req, res) => {
 });
 
 // to test remotely without seeing the front page
-/*app.post('/test', (req, res) => {
+app.post('/test', (req, res) => {
     const jsonData = req.body;
     console.log(jsonData);
     res.json({ message: 'Data received successfully', data: jsonData });
-});*/
+});
 
 //to check the response from nettskjema
 app.get('/nettskjema', async (req, res) => {
@@ -93,13 +93,27 @@ app.post('/webhook', async (req, res) => {
         }
         //we created a query manually in KG editor named = fetch_data_custodian_info
         const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
-        //console.log(myHeaders);
+        //this is by default the id of the dataset version
+        //data custodian (if empty, not defined - means that the data custodian is the same as for the dataset)
+        //check data set version field custodian if empty?
+        //if yes, fetch linked dataset id --> get custodian 
         try{
             const requestOptions = await getRequestOptions();
             const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders);
-            console.log('we managed to fetch data:', dataKG);
+            console.log('we managed to fetch data:', dataKG[0]['data'][0]);
+
+            const custodianDatasetVersion = dataKG[0]['data'][0]['custodian'];
+            console.log('custodian of the dataset version to check if empty:', custodianDatasetVersion);
+            if (custodianDatasetVersion.length === 0) {
+                const datasetCustodian = dataKG[0]['data'][0]['dataset'][0]['custodian'];               
+                const foundObject = datasetCustodian.find(obj => obj.contactInformation.length !== 0);
+                console.log('I found the email of the custodian:', foundObject);
+                console.log(foundObject['givenName']);
+            } else {
+                console.log('take the custodian of the dataset version');
+            }
         }catch (error) {
-            console.error('Error fetching instances from KG.', error);
+            console.error('There is a problem somewhere', error);
             throw error;
         }
 

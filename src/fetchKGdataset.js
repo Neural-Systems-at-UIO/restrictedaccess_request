@@ -16,8 +16,8 @@ export async function fetchKGjson(queryID, datasetID, headers) {
             throw error;} 
 
         const data = await response.json();
-        console.log(data['data'][0]);
-        results.push(data['data'][0]);   
+        //console.log('complete response', data);
+        results.push(data);   
     } catch (error) {
         console.error(`Error fetching instance from KG`, error);
         throw error; 

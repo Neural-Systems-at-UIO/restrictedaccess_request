@@ -1,7 +1,7 @@
 //put here nettskjema api endpoints to fetch data
 
 import fetch from 'node-fetch';
-import {NETTSKJEMA_QUESTIONS_ID} from './constants.js';
+import {NETTSKJEMA_QUESTIONS_ID, DRF_ID} from './constants.js';
 
 export async function fetchSubmission(submissionId, tokenNettskjema) {
     const response = await fetch(`https://api.nettskjema.no/v3/form/submission/${submissionId}`, {
@@ -36,4 +36,31 @@ export async function fetchAnswers(submissionData) {
     const datasetID = result['textAnswer'];
 
     return datasetID;
+}
+
+export async function fetchPosition(extractedSubmissionId, tokenNettskjema, positionAnswerCode) {
+    const positionElementId = 1716162;
+    const response = await fetch(`https://api.nettskjema.no/v3/form/${DRF_ID}/definition`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${tokenNettskjema}`,
+            'Accept': 'application/json'  
+        }
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to fetch submission data`);
+    }
+    const submissionData = await response.json();
+    const positionIds = submissionData["elements"].find(d => d["elementId"]===positionElementId);
+    const positionAnswerId = positionIds['answerOptions'].find(d => d["answerOptionId"]===positionAnswerCode);
+    
+    let positionAnswer;   
+    if (positionAnswerId["text"]==="Other"){
+        const submissionData = await fetchSubmission(extractedSubmissionId, tokenNettskjema);
+        const positionOtherId = submissionData['answers'].find(d => d['externalElementId']==='PositionOther');
+        positionAnswer = positionOtherId['textAnswer'];
+    }else {    
+        positionAnswer = positionAnswerId["text"];}
+
+    return positionAnswer;
 }

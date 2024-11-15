@@ -5,7 +5,7 @@
 //has elementId and externalElementId which is text - i save this in the constant file
 
 //in case of new version of nettskjema, elementId (or questionId) can be found by externalElementId
-const DRF_ID = 127835;
+export const DRF_ID = 127835;
 
 export const NETTSKJEMA_QUESTIONS_ID = {
     "DatasetTitle": 3748463,
@@ -19,3 +19,12 @@ export const NETTSKJEMA_QUESTIONS_ID = {
     "Orcid" : 1716170,
     "Purpose" : 1716171
 };
+//info from the nettskjema endpoint https://api.nettskjema.no/v3/form/127835/definition
+export const POSITION_ANSWER_ID = {
+    "Professor": 4063185,
+    "Assistant Professor" : 4063186,
+    "Researcher" : 4063187,
+    "Post doc" : 4063188,
+    "PhD-student" : 4063189,
+    "Other" : 4063190
+}

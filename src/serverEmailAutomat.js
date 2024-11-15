@@ -3,9 +3,11 @@ import cron from 'node-cron';
 import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
-import {fetchSubmission, fetchAnswers} from './fetchNettskjemaData.js';
+import {fetchSubmission, fetchAnswers, fetchPosition} from './fetchNettskjemaData.js';
 import {getRequestOptions} from './kgAuthentication.js';
 import {fetchKGjson} from './fetchKGdataset.js';
+import {modifyUrlPath} from './changeUrl.js';
+import {extractSubmissionId} from './changeUrl.js';
 import dotenv from 'dotenv';
 dotenv.config(); 
 
@@ -32,6 +34,7 @@ const initializeTokens = async () => {
         const tokenNettskjema = await fetchToken();
         const tokenKG = await getRequestOptions();
         tokenStore.tokenNettskjema = tokenNettskjema;
+        //console.log(tokenNettskjema);
         tokenStore.tokenKG = tokenKG;
     } catch (error) {
         console.error('Error fetching tokens:', error);
@@ -64,7 +67,7 @@ app.get('/nettskjema', async (req, res) => {
         if (!tokenStore.tokenNettskjema) {
             throw new Error('Token for nettskjema not available');
         }
-        const submissionId = 33139391;
+        const submissionId = 33236276;
         const data = await fetchSubmission(submissionId, tokenStore.tokenNettskjema);
         res.status(200).json(data);
     }catch (error) {
@@ -76,7 +79,8 @@ app.post('/webhook', async (req, res) => {
     const event = req.body.event;
     console.log('webhook is fired:', event);
     const data = req.body.data;
-    const submissionId = data.submission_id;
+    const submissionId = data.submission_id;  //submission id in the nettskjema 
+    const extractedSubmissionId = extractSubmissionId(submissionId); //extract sumbissionId from the webhook url
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
     //this is by default the id of the dataset version
@@ -90,17 +94,16 @@ app.post('/webhook', async (req, res) => {
         if (!tokenStore.tokenKG) {
             throw new Error('Token to access KG not available');
         }
-        const submissionData = await fetchSubmission(submissionId, tokenStore.tokenNettskjema);
+        const submissionData = await fetchSubmission(extractedSubmissionId, tokenStore.tokenNettskjema);
         const datasetID = await fetchAnswers(submissionData);
-        //console.log('datasetID:', datasetID);
         if (!datasetID) {
             throw new Error('Could not fetch dataset id from nettskjema');
         } 
         //const requestOptions = await getRequestOptions();
         const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders);
-        //console.log('we managed to fetch data:', dataKG[0]['data'][0]);
         const custodianDatasetVersion = dataKG[0]['data'][0]['custodian'];
-        //console.log('custodian of the dataset version to check if empty:', custodianDatasetVersion);
+        const originalUrl = dataKG[0]['data'][0]['id'];  //requested dataset version id
+        const modifiedUrl = modifyUrlPath(originalUrl);
         let nameCustodian;
         let surnameCustodian;
         let emailCustodian;
@@ -112,8 +115,6 @@ app.post('/webhook', async (req, res) => {
             nameCustodian = foundPerson['givenName'];
             surnameCustodian = foundPerson['familyName'];
             emailCustodian = foundPerson['contactInformation'][0];
-            //console.log('custodians name:', nameCustodian, surnameCustodian);
-            //console.log('email of the data custodian:', emailCustodian)
         } else {
             console.log('take the custodian of the dataset version');
             //contact info for organization is empty
@@ -123,15 +124,25 @@ app.post('/webhook', async (req, res) => {
             surnameCustodian = foundPersonVersion['familyName'];
             emailCustodian = foundPersonVersion['contactInformation'][0];              
         }
-            //return {emailCustodian, nameCustodian, surnameCustodian};
-
+        //from submitted nettskjema
         const respondentName = submissionData['submissionMetadata']['person']['name'];
         const respondentEmail = submissionData['submissionMetadata']['person']['email'];
+        const datasetTitle = submissionData['answers'].find(d => d['externalElementId']==='DatasetTitle');
+        const dataTitle = datasetTitle['textAnswer'];
+        const institution = submissionData['answers'].find(d => d['externalElementId']==='Institution');
+        const instituionCorrespondent = institution['textAnswer'];
+        const department = submissionData['answers'].find(d => d['externalElementId']==='Department');
+        const departm = department['textAnswer'];
+        const position = submissionData['answers'].find(d => d['externalElementId']==='Position');
+        const positionCode = position['answerOptionIds'];
+        const positionContact = await fetchPosition(extractedSubmissionId, tokenStore.tokenNettskjema, positionCode[0]);
+        const purpose = submissionData['answers'].find(d => d['externalElementId']==='Purpose');
+        const purposeAccess = purpose['textAnswer'];
+        console.log('position:', positionContact);
+        //console.log(submissionData);
+
         //send email:
-        console.log('email custodian', emailCustodian);
-        sendEmailOnWebhook(respondentName, respondentEmail, nameCustodian, surnameCustodian, emailCustodian['email']);
-
-
+        sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);
     } catch (error) {
         console.error('Error sending email:', error);
     };

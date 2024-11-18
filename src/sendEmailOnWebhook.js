@@ -6,7 +6,6 @@ import {generateEmailHtml} from './htmlEmail.js';
 const gmail_pass = process.env.GMAIL_PASS;
 const gmail_user = process.env.GMAIL_USER;
 const senderEmail = process.env.GMAIL_SENDER;
-const tryEmail = process.env.GMAIL_MAIL;
 
 const emailGmail = {
     host: "smtp.gmail.com",
@@ -22,14 +21,16 @@ const emailGmail = {
 }
 
 export async function sendEmailOnWebhook(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian) {
+    //const tryEmail = process.env.GMAIL_MAIL;
+    const tryEmail = emailCustodian;
+    //at deployment remove passing here the custodianEmail argumnet
     const emailHtml = generateEmailHtml(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian);
     const transporter = nodemailer.createTransport(emailGmail);
     const mailOptions = {
         from: senderEmail, // Sender address
-        to: tryEmail,     // Recipient address
-        subject: 'This is an authomaticly generated email from the Ebrains curation team',   // dataset access request
-        //text: 'Hello, I am very glad that I sent you an email.',                             // Plain text body
-        html: emailHtml   //htmlContent          // HTML body
+        to: tryEmail,     // Recipient address - custodian - change at deployment
+        subject: 'This is an authomaticly generated email from Ebrains curation team',   // dataset access request                           // Plain text body
+        html: emailHtml   //htmlContent 
     };
     try {
         const info = await transporter.sendMail(mailOptions);

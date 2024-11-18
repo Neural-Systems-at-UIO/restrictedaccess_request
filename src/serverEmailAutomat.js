@@ -61,7 +61,7 @@ app.post('/test', (req, res) => {
     res.json({ message: 'Data received successfully', data: jsonData });
 });
 
-//to check the response from nettskjema
+//to check the response from nettskjema - remove at deployment
 app.get('/nettskjema', async (req, res) => {
     try {
         if (!tokenStore.tokenNettskjema) {
@@ -107,6 +107,7 @@ app.post('/webhook', async (req, res) => {
         let nameCustodian;
         let surnameCustodian;
         let emailCustodian;
+        //if the custodian of the dataset version is empty, we take custodian of the dataset
         if (custodianDatasetVersion.length === 0) {
             const datasetCustodian = dataKG[0]['data'][0]['dataset'][0]['custodian'];  
             //custodian can be organization, consorcium or person, we need person type             
@@ -124,6 +125,7 @@ app.post('/webhook', async (req, res) => {
             surnameCustodian = foundPersonVersion['familyName'];
             emailCustodian = foundPersonVersion['contactInformation'][0];              
         }
+        console.log('email custodian', emailCustodian);
         //from submitted nettskjema
         const respondentName = submissionData['submissionMetadata']['person']['name'];
         const respondentEmail = submissionData['submissionMetadata']['person']['email'];
@@ -140,9 +142,16 @@ app.post('/webhook', async (req, res) => {
         const purposeAccess = purpose['textAnswer'];
         console.log('position:', positionContact);
         //console.log(submissionData);
-
+        
+        if (emailCustodian['email'].length>0){
+            //send email:
+        sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no');
+        //emailCustodian['email']
+        }else{
+            console.log('Custodian of the dataset does not have any contact information availabale.')
+        }
         //send email:
-        sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);
+        //sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);
     } catch (error) {
         console.error('Error sending email:', error);
     };

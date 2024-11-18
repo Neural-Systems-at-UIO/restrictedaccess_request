@@ -28,7 +28,7 @@ export function generateEmailHtml(contactPersonName, recipientEmail, positionCon
         <h3>Request to access data published on Ebrains</h3>
     </div>
     <div class="content">
-        <p>Dear ${nameCustodian} ${surnameCustodian} (change at deployment to email of the data custodian and remove here: ${emailCustodian})</p>
+        <p>Dear ${nameCustodian} ${surnameCustodian}</p>
         <p>We have received a data access request for the following human dataset published
          on EBRAINS: ${dataTitle}, ${modifiedUrl}.</p>
         <p>${positionContact}, ${contactPersonName} from the ${institution}, ${departm} would like to perform: "${purposeAccess}"</p>
@@ -44,11 +44,14 @@ export function generateEmailHtml(contactPersonName, recipientEmail, positionCon
     <li>spam issue</li>
     <li>text of the email</li>
     <li>if there is no contact information, or custodian is an organization, send email to the person requesting? </li>
+    <li>if people check several position boxes (submission_id = 33256385)</li>
     </ul>
     </body>
     </html>
     `
 };
+
+//(change at deployment to email of the data custodian and remove here: ${emailCustodian})
 
 //${modifiedUrl}
 /*

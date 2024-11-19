@@ -24,12 +24,12 @@ export async function sendEmailOnWebhook(contactPersonName, recipientEmail, posi
     //const tryEmail = process.env.GMAIL_MAIL;
     const tryEmail = emailCustodian;
     //at deployment remove passing here the custodianEmail argumnet
-    const emailHtml = generateEmailHtml(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian);
+    const emailHtml = generateEmailHtml(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, nameCustodian, surnameCustodian);
     const transporter = nodemailer.createTransport(emailGmail);
     const mailOptions = {
         from: senderEmail, // Sender address
         to: tryEmail,     // Recipient address - custodian - change at deployment
-        subject: 'This is an authomaticly generated email from Ebrains curation team',   // dataset access request                           // Plain text body
+        subject: 'Request to access data published on Ebrains',   // dataset access request                           // Plain text body
         html: emailHtml   //htmlContent 
     };
     try {

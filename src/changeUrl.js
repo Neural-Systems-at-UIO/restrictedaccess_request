@@ -16,11 +16,12 @@ export function extractSubmissionId(nettskjemaUrl) {
   const validSegments = pathSegments.filter(segment => segment.length > 0);
   const segmentCount = validSegments.length;
   const lastSegment = validSegments[segmentCount - 1];
+  //to check that we have only numbers in this part of url
   const isNumber = /^\d+$/.test(lastSegment);
   if (!isNumber) {
     throw new Error(`Not possible to extract submission id from the webhook: "${lastSegment}".`);
   }
-  if(isNaN(lastSegment)){throw error;}
+  if(isNaN(lastSegment)){new Error(`Submission id is missing in url sent by zammad webhook: "${lastSegment}".`);}
   return lastSegment;
 }
   

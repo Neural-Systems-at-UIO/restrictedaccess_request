@@ -3,7 +3,7 @@
 import fetch from 'node-fetch';
 import {NETTSKJEMA_QUESTIONS_ID, DRF_ID} from './constants.js';
 
-export async function fetchSubmission(submissionId, tokenNettskjema) {
+export async function fetchSubmission(submissionId, tokenNettskjema, next) {
     const response = await fetch(`https://api.nettskjema.no/v3/form/submission/${submissionId}`, {
         method: 'GET',
         headers: {
@@ -12,25 +12,42 @@ export async function fetchSubmission(submissionId, tokenNettskjema) {
         }
     });
     if (!response.ok) {
-        throw new Error(`Failed to fetch submission data`);
+        const errorMessage = `Failed to connect to nettskjema api: ${response.status}`;
+        console.error(errorMessage); 
+        logger.error(errorMessage);  
+        const error = new Error(errorMessage);
+        next(error); 
+        return;      
     }
     const submissionData = await response.json();
     return submissionData;
 }
 
-export async function fetchAnswers(submissionData) {
+export async function fetchAnswers(submissionData, next) {
     const datasetElementId = NETTSKJEMA_QUESTIONS_ID['DatasetID'];
     let result;
     try{
         if (!submissionData || !Array.isArray(submissionData['answers'])) {
-            throw new Error("Invalid submission data or missing answers");
+            //throw new Error("Invalid submission data or missing answers field");
+            const errorMessage = "Invalid submission data or missing answers field";
+            console.error(errorMessage); 
+            logger.error(errorMessage);  
+            const error = new Error(errorMessage);
+            next(error); 
+            return; 
         }
         result = submissionData['answers'].find(item => item.elementId === datasetElementId);
         if (!result) {
-            throw new Error("DatasetID not found in nettskjema");
+            //throw new Error("DatasetID not found in nettskjema");
+            const errorMessage = "DatasetID not found in nettskjema";
+            console.error(errorMessage); 
+            logger.error(errorMessage);  
+            const error = new Error(errorMessage);
+            next(error); 
+            return; 
         }
     }catch (error) {
-        console.error('Could not find dataset version id in the nettskjema:', error);
+        console.error('Problem fetching dataset version id from the nettskjema:', error);
         throw(error);
     };    
     const datasetID = result['textAnswer'];
@@ -38,7 +55,7 @@ export async function fetchAnswers(submissionData) {
     return datasetID;
 }
 
-export async function fetchPosition(extractedSubmissionId, tokenNettskjema, positionAnswerCode) {
+export async function fetchPosition(extractedSubmissionId, tokenNettskjema, positionAnswerCode, next) {
     const positionElementId = 1716162;
     const response = await fetch(`https://api.nettskjema.no/v3/form/${DRF_ID}/definition`, {
         method: 'GET',
@@ -48,7 +65,13 @@ export async function fetchPosition(extractedSubmissionId, tokenNettskjema, posi
         }
     });
     if (!response.ok) {
-        throw new Error(`Failed to fetch submission data`);
+        //throw new Error(`Failed to fetch submission data`);
+        const errorMessage = `Failed to fetch from nettskjema definition endpoint: ${response.status}`;
+        console.error(errorMessage); 
+        logger.error(errorMessage);  
+        const error = new Error(errorMessage);
+        next(error); 
+        return;
     }
     const submissionData = await response.json();
     const positionIds = submissionData["elements"].find(d => d["elementId"]===positionElementId);

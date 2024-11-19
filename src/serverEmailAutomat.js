@@ -9,12 +9,22 @@ import {fetchKGjson} from './fetchKGdataset.js';
 import {modifyUrlPath} from './changeUrl.js';
 import {extractSubmissionId} from './changeUrl.js';
 import dotenv from 'dotenv';
+import logger from './logger.js';
 dotenv.config(); 
 
 const app = express();
 app.use(express.json());
 const port = 4000;
-
+//const port = process.env.PORT || 4000;
+//to log requests
+app.use((req, res, next) => {
+    logger.info(`${req.method} ${req.url}`);
+    next();
+});
+app.use((err, req, res, next) => {
+    logger.error(`Error: ${err.message}`);
+    res.status(500).json({ error: 'Internal Server Error' });
+});
 //use my ebrain account for testing
 const maya_token = process.env.MAYA_EBRAIN_TOKEN;
 const token_maya = "Bearer " + maya_token;
@@ -38,6 +48,8 @@ const initializeTokens = async () => {
         tokenStore.tokenKG = tokenKG;
     } catch (error) {
         console.error('Error fetching tokens:', error);
+        logger.error(`Error fetching tokens: ${error.message}`, error);
+        next(error);
     }
 };
 //a simple front end page just to see that app is working
@@ -49,16 +61,21 @@ app.get('/', async (req, res) => {
         const data = await mainAppPage();
         res.send(data);
     } catch (error) {
-        console.error('Error starting app:', error);
         res.status(500).send('Internal Server Error');
+        logger.error(`Internal Server Error: ${error.message}`, error);
+        next(error);
     }
 });
 
-// to test remotely without seeing the front page
+// to test post requests
 app.post('/test', (req, res) => {
     const jsonData = req.body;
     console.log(jsonData);
     res.json({ message: 'Data received successfully', data: jsonData });
+});
+//to test get requests
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'UP' });
 });
 
 //to check the response from nettskjema - remove at deployment
@@ -68,14 +85,14 @@ app.get('/nettskjema', async (req, res) => {
             throw new Error('Token for nettskjema not available');
         }
         const submissionId = 33236276;
-        const data = await fetchSubmission(submissionId, tokenStore.tokenNettskjema);
+        const data = await fetchSubmission(submissionId, tokenStore.tokenNettskjema, next);
         res.status(200).json(data);
     }catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 //the main endpoint
-app.post('/webhook', async (req, res) => {
+app.post('/webhook', async (req, res, next) => {
     const event = req.body.event;
     console.log('webhook is fired:', event);
     const data = req.body.data;
@@ -94,13 +111,13 @@ app.post('/webhook', async (req, res) => {
         if (!tokenStore.tokenKG) {
             throw new Error('Token to access KG not available');
         }
-        const submissionData = await fetchSubmission(extractedSubmissionId, tokenStore.tokenNettskjema);
-        const datasetID = await fetchAnswers(submissionData);
+        const submissionData = await fetchSubmission(extractedSubmissionId, tokenStore.tokenNettskjema, next);
+        const datasetID = await fetchAnswers(submissionData, next);
         if (!datasetID) {
             throw new Error('Could not fetch dataset id from nettskjema');
         } 
         //const requestOptions = await getRequestOptions();
-        const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders);
+        const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders, next);
         const custodianDatasetVersion = dataKG[0]['data'][0]['custodian'];
         const originalUrl = dataKG[0]['data'][0]['id'];  //requested dataset version id
         const modifiedUrl = modifyUrlPath(originalUrl);
@@ -137,7 +154,7 @@ app.post('/webhook', async (req, res) => {
         const departm = department['textAnswer'];
         const position = submissionData['answers'].find(d => d['externalElementId']==='Position');
         const positionCode = position['answerOptionIds'];
-        const positionContact = await fetchPosition(extractedSubmissionId, tokenStore.tokenNettskjema, positionCode[0]);
+        const positionContact = await fetchPosition(extractedSubmissionId, tokenStore.tokenNettskjema, positionCode[0], next);
         const purpose = submissionData['answers'].find(d => d['externalElementId']==='Purpose');
         const purposeAccess = purpose['textAnswer'];
         console.log('position:', positionContact);
@@ -154,6 +171,8 @@ app.post('/webhook', async (req, res) => {
         //sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);
     } catch (error) {
         console.error('Error sending email:', error);
+        logger.error(`Failed to fetch data: ${error.message}`, error);
+        next(error);
     };
 // send a reply about a webhook fired successfully 
     res.status(200).json({ status: 'success', received: data });
@@ -168,4 +187,5 @@ cron.schedule('0 * * * *', async () => {
 app.listen(port, async () => {
     console.log(`Server is on http://localhost:${port}`);
     await initializeTokens();
+    logger.info(`Server is running on port ${port}`);
 });

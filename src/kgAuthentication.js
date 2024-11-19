@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 //const clientId = process.env.WIZARD_OIDC_CLIENT_ID;
 const clientSecret = process.env.WIZARD_OIDC_CLIENT_SECRET;
+//set up loggin here as well
 
 export async function getRequestOptions() {
 

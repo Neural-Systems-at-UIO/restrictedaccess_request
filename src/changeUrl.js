@@ -9,7 +9,9 @@ export function modifyUrlPath(originalUrl) {
   url.pathname = pathSegments.join('/');
   return url.toString(); 
 }
-  
+
+//url from zammad webhook has submission_id in the last segmetn
+//example of url from zammad webhook: https://nettskjema.no/user/form/127835/submission/{submission_id}
 export function extractSubmissionId(nettskjemaUrl) {
   const url = new URL(nettskjemaUrl);
   const pathSegments = url.pathname.split('/');
@@ -21,7 +23,9 @@ export function extractSubmissionId(nettskjemaUrl) {
   if (!isNumber) {
     throw new Error(`Not possible to extract submission id from the webhook: "${lastSegment}".`);
   }
-  if(isNaN(lastSegment)){new Error(`Submission id is missing in url sent by zammad webhook: "${lastSegment}".`);}
+  if(isNaN(lastSegment)){
+    throw new Error(`Submission id is missing in the url sent by zammad webhook: "${lastSegment}".`);
+  }
   return lastSegment;
 }
   

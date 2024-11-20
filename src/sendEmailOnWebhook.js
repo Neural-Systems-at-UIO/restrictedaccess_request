@@ -2,6 +2,7 @@
 import 'dotenv/config';
 import nodemailer from 'nodemailer';
 import {generateEmailHtml} from './htmlEmail.js';
+import logger from './logger.js';
 
 const gmail_pass = process.env.GMAIL_PASS;
 const gmail_user = process.env.GMAIL_USER;
@@ -20,23 +21,22 @@ const emailGmail = {
     }
 }
 
-export async function sendEmailOnWebhook(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian) {
-    //const tryEmail = process.env.GMAIL_MAIL;
-    const tryEmail = emailCustodian;
+export async function sendEmailOnWebhook(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, emailCustodian, next) {
     //at deployment remove passing here the custodianEmail argumnet
     const emailHtml = generateEmailHtml(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, nameCustodian, surnameCustodian);
     const transporter = nodemailer.createTransport(emailGmail);
     const mailOptions = {
-        from: senderEmail, // Sender address
-        to: tryEmail,     // Recipient address - custodian - change at deployment
-        subject: 'Request to access data published on Ebrains',   // dataset access request                           // Plain text body
-        html: emailHtml   //htmlContent 
+        from: senderEmail, // Sender address, replace by oslo curation team email at prod
+        to: emailCustodian,     // Recipient address - custodian - change at deployment
+        //cc : 'curation-support@humanbrainproject.eu', 
+        subject: zammadTicket,         
+        html: emailHtml  
     };
     try {
         const info = await transporter.sendMail(mailOptions);
-        console.log('Message sent: %s', info.messageId);
-        //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+        //console.log('Message sent: %s', info.messageId);
     } catch (error) {
-        console.error('Error sending email: ', error);
+        logger.error(`Error sending email to the data custodian: ${error.message}`, error);
+        next(error);
     }
 };

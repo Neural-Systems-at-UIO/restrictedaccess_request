@@ -11,20 +11,19 @@ export async function fetchKGjson(queryID, datasetID, headers, next) {
     const queryUrl = API_BASE_URL + API_ENDPOINT + `${queryID}` + "/instances?" + QUERY_PARAMS.join("&") + `${datasetID}`;
     const results = [];
     try {
-        const response = await fetch(queryUrl, headers); //requestOptions
+        const response = await fetch(queryUrl, headers); 
         if (!response.ok) {
-            console.error('Error connecting to KG: ' + response.status);
-            logger.error(`Error connecting to KG:`+ response.status);
-            next();
-            throw new Error(`Error connecting to KG: ${response.status}`);} 
+            const error = new Error('Error connecting to KG: ' + response.status);
+            logger.error(error.message);
+            next(error);
+            return;
+        } 
 
         const data = await response.json();
         results.push(data);   
     } catch (error) {
-        console.error(`Error fetching instance from KG:`, error);
         logger.error(`Error fetching instance from KG: ${error.message}`, error);
         next(error);
-        throw error; 
     }
     return results; 
 }

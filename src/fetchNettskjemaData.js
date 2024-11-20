@@ -12,8 +12,7 @@ export async function fetchSubmission(submissionId, tokenNettskjema, next) {
         }
     });
     if (!response.ok) {
-        const errorMessage = `Failed to connect to nettskjema api: ${response.status}`;
-        console.error(errorMessage); 
+        const errorMessage = `Failed to connect to nettskjema api: ${response.status}`; 
         logger.error(errorMessage);  
         const error = new Error(errorMessage);
         next(error); 
@@ -29,8 +28,7 @@ export async function fetchAnswers(submissionData, next) {
     try{
         if (!submissionData || !Array.isArray(submissionData['answers'])) {
             //throw new Error("Invalid submission data or missing answers field");
-            const errorMessage = "Invalid submission data or missing answers field";
-            console.error(errorMessage); 
+            const errorMessage = "Invalid submission data or missing answers field"; 
             logger.error(errorMessage);  
             const error = new Error(errorMessage);
             next(error); 
@@ -40,7 +38,6 @@ export async function fetchAnswers(submissionData, next) {
         if (!result) {
             //throw new Error("DatasetID not found in nettskjema");
             const errorMessage = "DatasetID not found in nettskjema";
-            console.error(errorMessage); 
             logger.error(errorMessage);  
             const error = new Error(errorMessage);
             next(error); 
@@ -66,8 +63,7 @@ export async function fetchPosition(extractedSubmissionId, tokenNettskjema, posi
     });
     if (!response.ok) {
         //throw new Error(`Failed to fetch submission data`);
-        const errorMessage = `Failed to fetch from nettskjema definition endpoint: ${response.status}`;
-        console.error(errorMessage); 
+        const errorMessage = `Failed to fetch from nettskjema definition endpoint: ${response.status}`; 
         logger.error(errorMessage);  
         const error = new Error(errorMessage);
         next(error); 

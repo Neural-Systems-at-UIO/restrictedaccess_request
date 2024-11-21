@@ -3,7 +3,7 @@ import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
 import {fetchSubmission, fetchAnswers, fetchPosition} from './fetchNettskjemaData.js';
-import {getRequestOptions} from './kgAuthentication.js';
+//import {getRequestOptions} from './kgAuthentication.js';
 import {fetchKGjson} from './fetchKGdataset.js';
 import {modifyUrlPath} from './changeUrl.js';
 import {extractSubmissionId} from './changeUrl.js';
@@ -33,7 +33,7 @@ myHeaders.append("Authorization", token_maya);
 myHeaders.append("Accept", '*/*');
 const mayaHeaders = {headers: myHeaders};
 
-//a simple front end page just to see that app is working
+//a simple front end page just for showing something
 async function mainAppPage() {
     return htmlPageContent;
 }
@@ -59,18 +59,7 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'UP' });
 });
 
-//to check the response from nettskjema - remove at deployment
-app.get('/nettskjema', async (req, res, next) => {
-    try {
-        const tokenNettskjema = await fetchToken();
-        const submissionId = 33236276;
-        const data = await fetchSubmission(submissionId, tokenNettskjema, next);
-        res.status(200).json(data);
-    }catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-//the main endpoint
+//the webhook endpoint
 app.post('/webhook', async (req, res, next) => {
     const event = req.body.event;
     logger.info(`webhook is fired: ${event}`);
@@ -79,10 +68,6 @@ app.post('/webhook', async (req, res, next) => {
     const extractedSubmissionId = extractSubmissionId(submissionId); 
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
-    //this is by default the id of the dataset version
-    //data custodian (if empty, not defined - means that the data custodian is the same as for the dataset)
-    //check data set version field custodian if empty?
-    //if yes, fetch linked dataset id --> get custodian
     try {        
         const tokenNettskjema = await fetchToken();
         if (!tokenNettskjema) {
@@ -110,16 +95,12 @@ app.post('/webhook', async (req, res, next) => {
         let emailCustodian;
         //if the custodian of the dataset version is empty, we take custodian of the dataset
         if (custodianDatasetVersion.length === 0) {
-            const datasetCustodian = dataKG[0]['data'][0]['dataset'][0]['custodian'];  
-            //custodian can be organization, consorcium or person, we need person type             
+            const datasetCustodian = dataKG[0]['data'][0]['dataset'][0]['custodian'];              
             const foundPerson = datasetCustodian.find(obj => obj.contactInformation.length !== 0);
-            //console.log('Data custodian:', foundPerson);
             nameCustodian = foundPerson['givenName'];
             surnameCustodian = foundPerson['familyName'];
             emailCustodian = foundPerson['contactInformation'][0];
         } else {
-            //console.log('take the custodian of the dataset version');
-            //contact info for organization is empty
             const foundPersonVersion = custodianDatasetVersion.find(obj => obj.contactInformation.length !== 0);
             console.log('Data custodian:', foundPersonVersion);
             nameCustodian = foundPersonVersion['givenName'];

@@ -1,5 +1,3 @@
-//put here nettskjema api endpoints to fetch data
-
 import fetch from 'node-fetch';
 import {NETTSKJEMA_QUESTIONS_ID, DRF_ID} from './constants.js';
 

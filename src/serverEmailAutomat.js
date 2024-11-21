@@ -4,7 +4,7 @@ import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
 import {fetchSubmission, fetchAnswers, fetchPosition} from './fetchNettskjemaData.js';
 //import {getRequestOptions} from './kgAuthentication.js';
-import {fetchKGjson} from './fetchKGdataset.js';
+import {contactInfoKG} from './contactDataKG.js';
 //import {modifyUrlPath} from './changeUrl.js';
 import {extractSubmissionId} from './changeUrl.js';
 import dotenv from 'dotenv';
@@ -85,28 +85,9 @@ app.post('/webhook', async (req, res, next) => {
 
         //replace here mayaHeaders with requestOptions and dedicated service account
         //const requestOptions = await getRequestOptions();
-        const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders);
-        logger.info("successfully fetched info from KG");
-        const custodianDatasetVersion = dataKG[0]['data'][0]['custodian'];
-        //const originalUrl = dataKG[0]['data'][0]['id'];  //requested dataset version id to create a link
-        //const modifiedUrl = modifyUrlPath(originalUrl);  //to send a link to the data custodians
-        let nameCustodian;
-        let surnameCustodian;
-        let emailCustodian;
-        //if the custodian of the dataset version is empty, we take custodian of the dataset
-        if (custodianDatasetVersion.length === 0) {
-            const datasetCustodian = dataKG[0]['data'][0]['dataset'][0]['custodian'];              
-            const foundPerson = datasetCustodian.find(obj => obj.contactInformation.length !== 0);
-            nameCustodian = foundPerson['givenName'];
-            surnameCustodian = foundPerson['familyName'];
-            emailCustodian = foundPerson['contactInformation'][0];
-        } else {
-            const foundPersonVersion = custodianDatasetVersion.find(obj => obj.contactInformation.length !== 0);
-            console.log('Data custodian:', foundPersonVersion);
-            nameCustodian = foundPersonVersion['givenName'];
-            surnameCustodian = foundPersonVersion['familyName'];
-            emailCustodian = foundPersonVersion['contactInformation'][0];              
-        }
+        const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, mayaHeaders);
+        logger.info("successfully fetched contact info from KG");
+
         //from submitted nettskjema
         const respondentName = submissionData['submissionMetadata']['person']['name'];
         const respondentEmail = submissionData['submissionMetadata']['person']['email'];

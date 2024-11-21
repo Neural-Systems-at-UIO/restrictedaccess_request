@@ -25,11 +25,11 @@ export async function fetchToken() {
                 },
             }
         );
+        const nettskjema_token = response.data.access_token;
 
-        return response.data.access_token;
+        return nettskjema_token;
 
     } catch (error) {
-        console.error('Failed to fetch access token:', error);
-        throw new Error('Failed to fetch access token');
+        throw new Error(`Failed to fetch nettskjema token: ${error.message}`);
     }
 }

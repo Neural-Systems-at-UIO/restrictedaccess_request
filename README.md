@@ -25,20 +25,20 @@ To test if the application is running, type in PowerShell:
 
 ```
 $headers = @{"Content-Type" = "application/json"}
->> $body = @{
->>      message = "Application is running"}
->> $jsonBody = $body | ConvertTo-Json
->> Invoke-RestMethod -Uri "http://localhost:4000/test" -Method POST -Headers $headers -Body $jsonBody
+$body = @{
+     message = "Application is running"}
+$jsonBody = $body | ConvertTo-Json
+Invoke-RestMethod -Uri "http://localhost:4000/test" -Method POST -Headers $headers -Body $jsonBody
 ```
 
 To try if application reacts to webhook, in PowerShell:
 
 ```
 $headers = @{"Content-Type" = "application/json"}
->> $body = @{
->>      event = "data request"
->>      data = @{submission_id = "33139391"}
->>  }
->> $jsonBody = $body | ConvertTo-Json
->> Invoke-RestMethod -Uri "http://localhost:4000/test" -Method POST -Headers $headers -Body $jsonBody
+$body = @{
+     event = "data request"
+     data = @{submission_id = "33139391"}
+ }
+$jsonBody = $body | ConvertTo-Json
+Invoke-RestMethod -Uri "http://localhost:4000/test" -Method POST -Headers $headers -Body $jsonBody
 ```

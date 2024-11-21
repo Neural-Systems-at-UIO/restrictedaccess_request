@@ -5,7 +5,7 @@ import {htmlPageContent} from './mainPageContent.js';
 import {fetchSubmission, fetchAnswers, fetchPosition} from './fetchNettskjemaData.js';
 //import {getRequestOptions} from './kgAuthentication.js';
 import {fetchKGjson} from './fetchKGdataset.js';
-import {modifyUrlPath} from './changeUrl.js';
+//import {modifyUrlPath} from './changeUrl.js';
 import {extractSubmissionId} from './changeUrl.js';
 import dotenv from 'dotenv';
 import logger from './logger.js';
@@ -19,10 +19,6 @@ app.use((req, res, next) => {
     logger.info(`${req.method} ${req.url}`);
     next();
 });
-app.use((err, req, res, next) => {
-    logger.error(`Error: ${err.message}`);
-    res.status(500).json({ error: 'Internal Server Error' });
-});
 
 //use my ebrain account for testing  -- replace with getRequestOptions()
 const maya_token = process.env.MAYA_EBRAIN_TOKEN;
@@ -33,6 +29,17 @@ myHeaders.append("Authorization", token_maya);
 myHeaders.append("Accept", '*/*');
 const mayaHeaders = {headers: myHeaders};
 
+app.use((err, req, res, next) => {
+    logger.error(`Error: ${err.message}`);
+    /*logger.error(`Error occurred at ${req.method} ${req.url} - ${err.message}`, {
+        method: req.method,
+        url: req.url,
+        stack: err.stack,
+    });*/
+    //logger.error({ message: err.message, stack: err.stack });
+    res.status(500).json({ error: 'Internal Server Error' });
+});
+
 //a simple front end page just for showing something
 async function mainAppPage() {
     return htmlPageContent;
@@ -42,7 +49,6 @@ app.get('/', async (req, res, next) => {
         const data = await mainAppPage();
         res.send(data);
     } catch (error) {
-        res.status(500).send('Internal Server Error');
         logger.error(`Internal Server Error: ${error.message}`, error);
         next(error);
     }
@@ -51,7 +57,7 @@ app.get('/', async (req, res, next) => {
 // to test post requests
 app.post('/test', (req, res) => {
     const jsonData = req.body;
-    console.log(jsonData);
+    logger.info(`incoming test post request: ${jsonData.message}`);
     res.json({ message: 'Data received successfully', data: jsonData });
 });
 //to test get requests
@@ -65,17 +71,13 @@ app.post('/webhook', async (req, res, next) => {
     logger.info(`webhook is fired: ${event}`);
     const data = req.body.data;
     const submissionId = data.submission_id;  
-    const extractedSubmissionId = extractSubmissionId(submissionId); 
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
-    try {        
+    try {  
+        const extractedSubmissionId = extractSubmissionId(submissionId);//I need subm id and zammad ticket number    
+        logger.info(`nettskjema request was received, submission id: ${extractedSubmissionId}`);
         const tokenNettskjema = await fetchToken();
-        if (!tokenNettskjema) {
-            const error = new Error('Token to access nettskjema not available');
-            logger.error(error.message);
-            next(error);
-            return;
-        }
+        logger.info("token for nettskjema is fetched successfully");
         const submissionData = await fetchSubmission(extractedSubmissionId, tokenNettskjema, next);
         const datasetID = await fetchAnswers(submissionData, next);
         if (!datasetID) {
@@ -88,8 +90,8 @@ app.post('/webhook', async (req, res, next) => {
         //const requestOptions = await getRequestOptions();
         const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders, next);
         const custodianDatasetVersion = dataKG[0]['data'][0]['custodian'];
-        const originalUrl = dataKG[0]['data'][0]['id'];  //requested dataset version id
-        const modifiedUrl = modifyUrlPath(originalUrl);
+        //const originalUrl = dataKG[0]['data'][0]['id'];  //requested dataset version id
+        //const modifiedUrl = modifyUrlPath(originalUrl);  //to send a link to the data custodians
         let nameCustodian;
         let surnameCustodian;
         let emailCustodian;
@@ -137,8 +139,12 @@ app.post('/webhook', async (req, res, next) => {
         }
         //sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);
     } catch (error) {
-        logger.error(`Error sending email: ${error.message}`, error);
-        next(error);
+        //logger.error(`Error sending email: ${error.message}`, error);
+        logger.error(`Error sending email:`, error);
+        //logger.error(`Error sending email: ${error.message}`);
+        //sendErrorNotification(error);  // Send email notification
+        //logger.warn('Error sending email, passing to error handler');
+        //next(error);  // Pass the error to the global error handler
     };
 // send a reply about a webhook fired successfully 
     res.status(200).json({ status: 'success', received: data });
@@ -147,3 +153,9 @@ app.post('/webhook', async (req, res, next) => {
 app.listen(port, async () => {
     logger.info(`Server is running on port ${port}`);
 });
+
+
+        //console.error('Failed to fetch nettskjema token:', error);
+        //throw new Error('Failed to fetch nettskjema token');
+        //logger.error(`Failed to fetch nettskjema token: ${error.message}`, { stack: error.stack });
+        //throw new Error(`Failed to fetch nettskjema token: ${error.message}`);

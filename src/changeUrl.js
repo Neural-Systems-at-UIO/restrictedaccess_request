@@ -23,9 +23,6 @@ export function extractSubmissionId(nettskjemaUrl) {
   if (!isNumber) {
     throw new Error(`Not possible to extract submission id from the webhook: "${lastSegment}".`);
   }
-  if(isNaN(lastSegment)){
-    throw new Error(`Submission id is missing in the url sent by zammad webhook: "${lastSegment}".`);
-  }
   return lastSegment;
 }
   

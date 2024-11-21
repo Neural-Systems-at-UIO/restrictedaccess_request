@@ -78,19 +78,17 @@ app.post('/webhook', async (req, res, next) => {
         logger.info(`nettskjema request was received, submission id: ${extractedSubmissionId}`);
         const tokenNettskjema = await fetchToken();
         logger.info("token for nettskjema is fetched successfully");
-        const submissionData = await fetchSubmission(extractedSubmissionId, tokenNettskjema, next);
-        const datasetID = await fetchAnswers(submissionData, next);
-        if (!datasetID) {
-            const error = new Error('Could not fetch dataset id from nettskjema');
-            logger.error(error.message);
-            next(error); 
-            return; 
-        } 
+        const submissionData = await fetchSubmission(extractedSubmissionId, tokenNettskjema);
+        logger.info("successfully fetched submission data from the nettskjema api");
+        const datasetID = await fetchAnswers(submissionData);
+        logger.info(`requested dataset id: ${datasetID}`);
+
         //replace here mayaHeaders with requestOptions and dedicated service account
         //const requestOptions = await getRequestOptions();
-        const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders, next);
+        const dataKG = await fetchKGjson(queryID, datasetID, mayaHeaders);
+        logger.info("successfully fetched info from KG");
         const custodianDatasetVersion = dataKG[0]['data'][0]['custodian'];
-        //const originalUrl = dataKG[0]['data'][0]['id'];  //requested dataset version id
+        //const originalUrl = dataKG[0]['data'][0]['id'];  //requested dataset version id to create a link
         //const modifiedUrl = modifyUrlPath(originalUrl);  //to send a link to the data custodians
         let nameCustodian;
         let surnameCustodian;
@@ -109,7 +107,6 @@ app.post('/webhook', async (req, res, next) => {
             surnameCustodian = foundPersonVersion['familyName'];
             emailCustodian = foundPersonVersion['contactInformation'][0];              
         }
-        console.log('email custodian', emailCustodian);
         //from submitted nettskjema
         const respondentName = submissionData['submissionMetadata']['person']['name'];
         const respondentEmail = submissionData['submissionMetadata']['person']['email'];
@@ -123,7 +120,7 @@ app.post('/webhook', async (req, res, next) => {
         const positionCode = position['answerOptionIds'];//people write several positions
         const posContact = [];
         for (const code of positionCode) {
-            const position = await fetchPosition(extractedSubmissionId, tokenNettskjema, code, next);
+            const position = await fetchPosition(extractedSubmissionId, tokenNettskjema, code);
             posContact.push(position);     
         }
         const positionContact = posContact.join(', ');
@@ -132,30 +129,18 @@ app.post('/webhook', async (req, res, next) => {
         
         if (emailCustodian['email'].length>0){
         const zammadTicket = 'test_mayas_app [Ticket#4824171]';
-        sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no', next);
+        sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no');
         //emailCustodian['email'] -- replace my email by the email of the custodian
         }else{
-            console.log('Custodian of the dataset does not have any contact information availabale.')
+            throw new Error('Custodian of the dataset did not provide contact information.');
         }
         //sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);
     } catch (error) {
-        //logger.error(`Error sending email: ${error.message}`, error);
         logger.error(`Error sending email:`, error);
-        //logger.error(`Error sending email: ${error.message}`);
-        //sendErrorNotification(error);  // Send email notification
-        //logger.warn('Error sending email, passing to error handler');
-        //next(error);  // Pass the error to the global error handler
-    };
-// send a reply about a webhook fired successfully 
+    }; 
     res.status(200).json({ status: 'success', received: data });
 });
 
 app.listen(port, async () => {
     logger.info(`Server is running on port ${port}`);
 });
-
-
-        //console.error('Failed to fetch nettskjema token:', error);
-        //throw new Error('Failed to fetch nettskjema token');
-        //logger.error(`Failed to fetch nettskjema token: ${error.message}`, { stack: error.stack });
-        //throw new Error(`Failed to fetch nettskjema token: ${error.message}`);

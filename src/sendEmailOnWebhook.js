@@ -21,8 +21,8 @@ const emailGmail = {
     }
 }
 
-export async function sendEmailOnWebhook(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, emailCustodian, next) {
-    //at deployment remove passing here the custodianEmail argumnet
+export async function sendEmailOnWebhook(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, emailCustodian) {
+    //at deployment remove passing here the custodianEmail argument
     const emailHtml = generateEmailHtml(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, nameCustodian, surnameCustodian);
     const transporter = nodemailer.createTransport(emailGmail);
     const mailOptions = {
@@ -34,9 +34,9 @@ export async function sendEmailOnWebhook(contactPersonName, recipientEmail, posi
     };
     try {
         const info = await transporter.sendMail(mailOptions);
+        logger.info(`Email is sent to the data custodian: ${info.messageId}`);
         //console.log('Message sent: %s', info.messageId);
     } catch (error) {
-        logger.error(`Error sending email to the data custodian: ${error.message}`, error);
-        next(error);
+        throw new Error(`Error sending email to the data custodian:: ${error.message}`);
     }
 };

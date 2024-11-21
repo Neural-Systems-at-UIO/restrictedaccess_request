@@ -1,10 +1,9 @@
 import fetch from 'node-fetch';
-import logger from './logger.js';
 
 //https://core.kg.ebrains.eu/v3/queries/de7e79ae-5b67-47bf-b8b0-8c4fa830348e/instances?stage=IN_PROGRESS&instanceId=54719155-54c7-4456-8987-36b7d5dce071
 //const queryUrl = 'https://core.kg.ebrains.eu/v3/instances/54719155-54c7-4456-8987-36b7d5dce071?stage=IN_PROGRESS'; 
    
-export async function fetchKGjson(queryID, datasetID, headers, next) {
+export async function fetchKGjson(queryID, datasetID, headers) {
     const API_BASE_URL = "https://core.kg.ebrains.eu/";
     const API_ENDPOINT = "v3/queries/";
     const QUERY_PARAMS = ["stage=IN_PROGRESS", "instanceId="];
@@ -13,17 +12,13 @@ export async function fetchKGjson(queryID, datasetID, headers, next) {
     try {
         const response = await fetch(queryUrl, headers); 
         if (!response.ok) {
-            const error = new Error('Error connecting to KG: ' + response.status);
-            logger.error(error.message);
-            next(error);
-            return;
+            throw new Error('Error connecting to KG: ' + response.status);
         } 
 
         const data = await response.json();
         results.push(data);   
     } catch (error) {
-        logger.error(`Error fetching instance from KG: ${error.message}`, error);
-        next(error);
+        throw new Error(`Problem fetching info from KG: ${error.message}`);
     }
     return results; 
 }

@@ -13,8 +13,8 @@ jobs:
       - name: Build and push Docker image
         run: |
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin docker-registry.ebrains.eu
-          docker build -t docker-registry.ebrains.eu/ebrains-data-curation/metadata-wizard-dev:${{ github.sha }} .
-          docker push docker-registry.ebrains.eu/ebrains-data-curation/metadata-wizard-dev:${{ github.sha }}
+          docker build -t docker-registry.ebrains.eu/ebrains-data-curation/restrictedaccess:${{ github.sha }} .
+          docker push docker-registry.ebrains.eu/ebrains-data-curation/restrictedaccess:${{ github.sha }}
       - name: Write kubeconfig to file
         run: |
           mkdir -p ${{ runner.temp }}/.kube
@@ -23,5 +23,5 @@ jobs:
         env: 
           KUBECONFIG: ${{ runner.temp }}/.kube/kubeconfig.yaml
         run: |
-          kubectl set image deployment/metadata-wizard-dev container-0=docker-registry.ebrains.eu/ebrains-data-curation/metadata-wizard-dev:${{ github.sha }} --namespace=metadata-wizard-dev
+          kubectl set image deployment/restrictedaccess container-0=docker-registry.ebrains.eu/ebrains-data-curation/restrictedaccess:${{ github.sha }} --namespace=restrictedaccess
         tags: myimage:${{ github.sha }}

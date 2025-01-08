@@ -3,7 +3,7 @@ import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
 import {fetchSubmission, fetchAnswers, fetchPosition} from './fetchNettskjemaData.js';
-//import {getRequestOptions} from './kgAuthentication.js';
+import {getRequestOptions} from './kgAuthentication.js';
 import {contactInfoKG} from './contactDataKG.js';
 //import {modifyUrlPath} from './changeUrl.js';
 import {extractSubmissionId} from './changeUrl.js';
@@ -15,12 +15,13 @@ const app = express();
 app.use(express.json());
 const port = process.env.PORT || 4000;
 
+//to log post requests from zammad webhook or tests
 app.use((req, res, next) => {
     logger.info(`${req.method} ${req.url}`);
     next();
 });
 
-//use my ebrain account for testing  -- replace with getRequestOptions()
+//use my ebrain account for testing  -- replace with service account and getRequestOptions()
 const maya_token = process.env.MAYA_EBRAIN_TOKEN;
 const token_maya = "Bearer " + maya_token;
 const myHeaders = new Headers();
@@ -31,12 +32,6 @@ const mayaHeaders = {headers: myHeaders};
 
 app.use((err, req, res, next) => {
     logger.error(`Error: ${err.message}`);
-    /*logger.error(`Error occurred at ${req.method} ${req.url} - ${err.message}`, {
-        method: req.method,
-        url: req.url,
-        stack: err.stack,
-    });*/
-    //logger.error({ message: err.message, stack: err.stack });
     res.status(500).json({ error: 'Internal Server Error' });
 });
 
@@ -66,8 +61,8 @@ app.get('/health', (req, res) => {
 });
 
 //the webhook endpoint
-app.post('/webhook', async (req, res, next) => {
-    const event = req.body.event;
+app.post('/webhook', async (req, res) => {
+    const event = req.body.event;   //modify this part accordingly when the weebhook is created
     logger.info(`webhook is fired: ${event}`);
     const data = req.body.data;
     const submissionId = data.submission_id;  
@@ -86,6 +81,7 @@ app.post('/webhook', async (req, res, next) => {
         //replace here mayaHeaders with requestOptions and dedicated service account
         //const requestOptions = await getRequestOptions();
         const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, mayaHeaders);
+        //const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, requestOptions);
         logger.info("successfully fetched contact info from KG");
 
         //from submitted nettskjema
@@ -109,10 +105,11 @@ app.post('/webhook', async (req, res, next) => {
         const purposeAccess = purpose['textAnswer'];
         
         if (emailCustodian['email'].length>0){
-        const zammadTicket = 'test_mayas_app [Ticket#4824171]';
+        const zammadTicket = 'test_mayas_app [Ticket#4824171]'; //this needs to be changed dynamically (get zammad ticket info from zammad webhook)
         sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no');
-        //emailCustodian['email'] -- replace my email by the email of the custodian
+        //emailCustodian['email'] -- replace my uio email by the email of the custodian
         }else{
+            //add here a notification email to the support team 
             throw new Error('Custodian of the dataset did not provide contact information.');
         }
         //sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);

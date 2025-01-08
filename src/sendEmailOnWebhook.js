@@ -6,8 +6,10 @@ import logger from './logger.js';
 
 const gmail_pass = process.env.GMAIL_PASS;
 const gmail_user = process.env.GMAIL_USER;
+// Sender address, replace by oslo curation team email at prod
 const senderEmail = process.env.GMAIL_SENDER;
 
+//setup here a mail trasporter
 const emailGmail = {
     host: "smtp.gmail.com",
     port: 587, // Use 465 for SSL
@@ -28,7 +30,7 @@ export async function sendEmailOnWebhook(contactPersonName, recipientEmail, posi
     const mailOptions = {
         from: senderEmail, // Sender address, replace by oslo curation team email at prod
         to: emailCustodian,     // Recipient address - custodian - change at deployment
-        //cc : 'curation-support@humanbrainproject.eu', 
+        cc : 'curation-support@ebrains.eu', 
         subject: zammadTicket,         
         html: emailHtml  
     };

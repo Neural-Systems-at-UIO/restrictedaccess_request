@@ -1,6 +1,6 @@
 //change from this https://kg.ebrains.eu/api/instances/{dataset version id}
 //to this https://search.kg.ebrains.eu/instances/{dataset version id}
-
+//i wanted to send a link to the dataset in the email to data custodians, but email gets marked as spam
 export function modifyUrlPath(originalUrl) {
   const url = new URL(originalUrl);
   url.hostname = 'search.kg.ebrains.eu';

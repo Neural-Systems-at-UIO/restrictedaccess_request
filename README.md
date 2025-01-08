@@ -58,3 +58,4 @@ Invoke-RestMethod -Uri "http://localhost:4000/webhook" -Method POST -Headers $he
 
 Authentication with OIDC client:
 https://github.com/HumanBrainProject/kg-core/blob/main/docs/authentication.md
+make corrections to the client and write to Paul about it

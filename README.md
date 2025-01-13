@@ -58,6 +58,3 @@ Invoke-RestMethod -Uri "http://localhost:4000/webhook" -Method POST -Headers $he
 
 Authentication with OIDC client:
 https://github.com/HumanBrainProject/kg-core/blob/main/docs/authentication.md
-
-For deployment to Kubernetes follow the instructions here:
-https://github.com/ehennestad/ebrains_wizard_eh/wiki/Workflow:-Build-and-Push-Dev-Image

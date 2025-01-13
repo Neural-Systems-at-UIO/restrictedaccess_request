@@ -7,6 +7,7 @@ const htmlPageContent = `
         <title>Automatic email to data custodian</title>
     </head>
     <body>
+        <img src="public/EBRAINS-Curation-Services.png" width="100%" height="100">
         <h1>This is a simple javascript (ES8) server</h1>
         <p>This application is running on rancher. It sends an email to data custodian when a new nettskjema 
         request is submitted.</p>

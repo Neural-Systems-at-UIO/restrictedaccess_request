@@ -12,6 +12,7 @@ import logger from './logger.js';
 dotenv.config(); 
 
 const app = express();
+//app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 const port = process.env.PORT || 4000;
 
@@ -22,13 +23,13 @@ app.use((req, res, next) => {
 });
 
 //use my ebrain account for testing  -- replace with service account and getRequestOptions()
-const maya_token = process.env.MAYA_EBRAIN_TOKEN;
-const token_maya = "Bearer " + maya_token;
-const myHeaders = new Headers();
-myHeaders.append("Content-Type", "application/json");
-myHeaders.append("Authorization", token_maya);    
-myHeaders.append("Accept", '*/*');
-const mayaHeaders = {headers: myHeaders};
+//const maya_token = process.env.MAYA_EBRAIN_TOKEN;
+//const token_maya = "Bearer " + maya_token;
+//const myHeaders = new Headers();
+//myHeaders.append("Content-Type", "application/json");
+//myHeaders.append("Authorization", token_maya);    
+//myHeaders.append("Accept", '*/*');
+//const mayaHeaders = {headers: myHeaders};
 
 app.use((err, req, res, next) => {
     logger.error(`Error: ${err.message}`);
@@ -65,11 +66,13 @@ app.post('/webhook', async (req, res) => {
     const event = req.body.event;   //modify this part accordingly when the weebhook is created
     logger.info(`webhook is fired: ${event}`);
     const data = req.body.data;
-    const submissionId = data.submission_id;  
+    const submissionId = data.submission_id;  //get submission id and zammad ticket from webhook
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
     try {  
-        const extractedSubmissionId = extractSubmissionId(submissionId);//I need subm id and zammad ticket number    
+        const extractedSubmissionId = extractSubmissionId(submissionId);//I need subm id and zammad ticket number
+        //extract zammad ticket number from the webhook and put it in the email subject    
+        const zammadTicket = 'test_mayas_app [Ticket#4824171]'; //this needs to be changed dynamically (get zammad ticket info from zammad webhook)
         logger.info(`nettskjema request was received, submission id: ${extractedSubmissionId}`);
         const tokenNettskjema = await fetchToken();
         logger.info("token for nettskjema is fetched successfully");
@@ -79,9 +82,10 @@ app.post('/webhook', async (req, res) => {
         logger.info(`requested dataset id: ${datasetID}`);
 
         //replace here mayaHeaders with requestOptions and dedicated service account
-        //const requestOptions = await getRequestOptions();
-        const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, mayaHeaders);
-        //const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, requestOptions);
+        const requestOptions = await getRequestOptions();
+        //for testing I was using my own KG token (copied after login from https://editor.kg.ebrains.eu/)
+        //const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, mayaHeaders);
+        const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, requestOptions);
         logger.info("successfully fetched contact info from KG");
 
         //from submitted nettskjema
@@ -105,16 +109,14 @@ app.post('/webhook', async (req, res) => {
         const purposeAccess = purpose['textAnswer'];
         
         if (emailCustodian['email'].length>0){
-        const zammadTicket = 'test_mayas_app [Ticket#4824171]'; //this needs to be changed dynamically (get zammad ticket info from zammad webhook)
         sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no');
-        //emailCustodian['email'] -- replace my uio email by the email of the custodian
+        //sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);
+        //in prod: replace my uio email by the email of the custodian: emailCustodian['email']
         }else{
-            //add here a notification email to the support team 
             throw new Error('Custodian of the dataset did not provide contact information.');
         }
-        //sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);
     } catch (error) {
-        logger.error(`Error sending email:`, error);
+        logger.error(`Something is not working:`, error);
     }; 
     res.status(200).json({ status: 'success', received: data });
 });

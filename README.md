@@ -4,10 +4,10 @@ A vanilla javascript backend app running on Rancher (kubernetes). Written in Nod
 
 The app sends an automatic email to data custodian informing about submitted request to access externally hosted data.
 
-Users send requests using nettskjema (id=127835), where they provide dataset title and dataset id, which is by default the id of the dataset version. When nettskjema is sent, a dedicated zammad ticket is created and zammad webhook sends a POST request to an endpoint of the application. Zammad webhook should contain the nettskjema url: https://nettskjema.no/user/form/127835/submission/{submission_id}. Submission_id is used to extract information about the requested dataset from the Nettskjema API. Using dataset version id, we fetch contact information of the data custodian from the Knowledge Graph API and forward request to the data custodian's email. The app sends an CC-email to the curation team with the ticket number in the email subject.
+Users send requests using nettskjema (id=127835), where they provide dataset title and dataset id, which is by default the id of the dataset version. When nettskjema is sent, a dedicated zammad ticket is created and zammad webhook sends a POST request to an endpoint of the application. Zammad webhook should contain the nettskjema url: https://nettskjema.no/user/form/127835/submission/{submission_id} and the corresponding zammad ticket number. Submission_id is used to extract information about the requested dataset from the Nettskjema API. Using dataset version id, we fetch contact information of the data custodian from the Knowledge Graph API and forward request to the data custodian's email. The app sends an CC-email to the curation team with the ticket number in the email subject.
 
 In order to fetch information from the Knowledge Graph API, we set up a service account as described here: https://docs.kg.ebrains.eu/8387ccd27a186dea3dd0b949dc528842/authentication.html#how-to-get-your-token
-Service account need permision to access contact information of the data custodians in both spaces: "RELEASED" and "IN_PROGRESS".
+Service account needs permision to access contact information of the data custodians in both spaces: "RELEASED" and "IN_PROGRESS".
 
 I created a ticket in Zammad for testing the application: https://support.humanbrainproject.eu/#ticket/zoom/24211. I assigned myself as an owner.
 
@@ -58,3 +58,6 @@ Invoke-RestMethod -Uri "http://localhost:4000/webhook" -Method POST -Headers $he
 
 Authentication with OIDC client:
 https://github.com/HumanBrainProject/kg-core/blob/main/docs/authentication.md
+
+For deployment to Kubernetes follow the instructions here:
+https://github.com/ehennestad/ebrains_wizard_eh/wiki/Workflow:-Build-and-Push-Dev-Image

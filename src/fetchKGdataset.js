@@ -20,6 +20,7 @@ export async function fetchKGjson(queryID, datasetID, headers) {
     } catch (error) {
         throw new Error(`Problem fetching info from KG: ${error.message}`);
     }
+    //console.log(results);
     return results; 
 }
 

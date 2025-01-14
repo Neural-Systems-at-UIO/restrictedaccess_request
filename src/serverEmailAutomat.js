@@ -1,4 +1,7 @@
+//vanilla javascript server (ES8)
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
@@ -10,6 +13,10 @@ import {extractSubmissionId} from './changeUrl.js';
 import dotenv from 'dotenv';
 import logger from './logger.js';
 dotenv.config(); 
+
+// Get __dirname with ESModules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 //app.use(express.static(path.join(__dirname, 'public')));
@@ -37,6 +44,7 @@ app.use((err, req, res, next) => {
 });
 
 //a simple front end page just for showing something
+app.use('/public', express.static(path.join(__dirname, 'public')));
 async function mainAppPage() {
     return htmlPageContent;
 }

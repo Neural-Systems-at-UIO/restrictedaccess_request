@@ -56,5 +56,37 @@ $jsonBody = $body | ConvertTo-Json
 Invoke-RestMethod -Uri "http://localhost:4000/webhook" -Method POST -Headers $headers -Body $jsonBody
 ```
 
+# Using curl from command line in console from Browser Developer Tools:
+
+```
+fetch('http://localhost:4000/webhook', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    event: 'test event',
+    data: {
+      submission_id: 'https://nettskjema.no/user/form/127835/submission/33139391'
+    }
+  })
+})
+.then(response => {
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+  return response.json();
+})
+.then(data => console.log('Success:', data))
+.catch(error => console.error('Error:', error));
+
+```
+
+# using Postman:
+
+```
+curl -X POST http://localhost:4000/webhook -H "Content-Type: application/json" -d '{"event":"test event"}'
+```
+
 Authentication with OIDC client:
 https://github.com/HumanBrainProject/kg-core/blob/main/docs/authentication.md

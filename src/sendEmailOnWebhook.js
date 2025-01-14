@@ -12,13 +12,13 @@ import logger from './logger.js';
 //  - EMAIL_USER: user name of the mail transporter 
 //https://gitlab.ebrains.eu/ri/tech-hub/devops/docs/-/blob/main/Email_relay.md
 
-const gmail_pass = process.env.GMAIL_PASS;  //comment these lines about gmail at prod
-const gmail_user = process.env.GMAIL_USER;
-const senderEmail = process.env.GMAIL_SENDER;
+//const gmail_pass = process.env.GMAIL_PASS;  //comment these lines about gmail at prod
+//const gmail_user = process.env.GMAIL_USER;
+//const senderEmail = process.env.GMAIL_SENDER;
 //const senderEmail = process.env.EMAIL_ADDRESS_SENDER;
 
 //my own gmail mail trasporter for testing
-const emailGmail = {
+/* const emailGmail = {
     host: "smtp.gmail.com",
     port: 587, // Use 465 for SSL
     secure: false, // Use true for SSL
@@ -29,7 +29,7 @@ const emailGmail = {
     tls: {
       rejectUnauthorized: false // This helps in development and might be risky for production (?)
     }
-}
+} */
 
 //the ebrains mail transporter
 const transportConf = {
@@ -50,7 +50,8 @@ const transportConf = {
 export async function sendEmailOnWebhook(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, emailCustodian) {
     //text of the email: 
     const emailHtml = generateEmailHtml(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, nameCustodian, surnameCustodian);
-    const transporter = nodemailer.createTransport(emailGmail);//for testing my own gmail emailGmail
+    //const transporter = nodemailer.createTransport(emailGmail);//for testing my own gmail emailGmail
+    const transporter = nodemailer.createTransport(transportConf);
     // for prod use the wizard mail trasporter: transportConf
     const mailOptions = {
         from: senderEmail, // Sender address, replace by oslo curation team email at prod EMAIL_ADDRESS_SENDER

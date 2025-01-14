@@ -16,6 +16,7 @@ import logger from './logger.js';
 //const gmail_user = process.env.GMAIL_USER;
 //const senderEmail = process.env.GMAIL_SENDER;
 //const senderEmail = process.env.EMAIL_ADDRESS_SENDER;
+const senderEmail = '"Oslo curation team" <curation-support@ebrains.eu>';
 
 //my own gmail mail trasporter for testing
 /* const emailGmail = {

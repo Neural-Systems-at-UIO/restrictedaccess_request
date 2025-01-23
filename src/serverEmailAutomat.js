@@ -59,13 +59,14 @@ app.get('/', async (req, res, next) => {
 });
 
 // to test post requests
-app.post('/test', (req, res) => {
+app.post('/test', async (req, res) => {
     const jsonData = req.body;
     logger.info(`incoming test post request: ${jsonData.message}`);
     res.json({ message: 'Data received successfully', data: jsonData });
+    console.log('testing post requests to test endpoint');
 });
 //to test get requests
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
     res.status(200).json({ status: 'UP' });
 });
 

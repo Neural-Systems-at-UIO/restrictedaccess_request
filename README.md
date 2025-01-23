@@ -131,3 +131,16 @@ If a new ticket is received to the Share data group containing "Registration to 
 "ticket_no": "#{ticket.id}",
 "submission_url": ": https://nettskjema.no/user/form/127835/submission/{{ticket.title | regex_extract: 'Ref\\. (\\d+)', 1}}"
 }
+https://nettskjema.no/user/form/127835/submission/{{ticket.title | regex_extract: 'Ref\\. (\\d+)', 1}}"
+
+To try if application reacts to webhook, in PowerShell:
+
+```
+$headers = @{"Content-Type" = "application/json"}
+$body = @{
+     event = "data request"
+     data = @{submission_id = "https://nettskjema.no/user/form/127835/submission/33139391"}
+ }
+$jsonBody = $body | ConvertTo-Json
+Invoke-RestMethod -Uri "https://restrictedaccess.apps.ebrains.eu/webhook" -Method POST -Headers $headers -Body $jsonBody
+```

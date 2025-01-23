@@ -71,16 +71,21 @@ app.get('/health', (req, res) => {
 
 //the webhook endpoint
 app.post('/webhook', async (req, res) => {
-    const event = req.body.event;   //modify this part accordingly when the weebhook is created
-    logger.info(`webhook is fired: ${event}`);
+    //const event = req.body.event;   //modify this part accordingly when the weebhook is created
+    //logger.info(`webhook is fired: ${event}`);
+    logger.info(`webhook is fired`);
     const data = req.body.data;
-    const submissionId = data.submission_id;  //get submission id and zammad ticket from webhook
+    logger.info(`POST received: ${data}`);
+    const submissionId = data.submission_url;  //get submission id and zammad ticket from webhook
+    const zammadTicket = data.ticket_no;
+    logger.info(`requested nettskjema: ${submissionId}`);
+    logger.info(`Zammad ticket: ${zammadTicket}`);
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
     try {  
         const extractedSubmissionId = extractSubmissionId(submissionId);//I need subm id and zammad ticket number
         //extract zammad ticket number from the webhook and put it in the email subject    
-        const zammadTicket = 'test_mayas_app [Ticket#4824171]'; //this needs to be changed dynamically (get zammad ticket info from zammad webhook)
+        //const zammadTicket = 'test_mayas_app [Ticket#4824171]'; //this needs to be changed dynamically (get zammad ticket info from zammad webhook)
         logger.info(`nettskjema request was received, submission id: ${extractedSubmissionId}`);
         const tokenNettskjema = await fetchToken();
         logger.info("token for nettskjema is fetched successfully");

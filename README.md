@@ -1,6 +1,8 @@
 # access_data_email
 
-A vanilla javascript backend app running on Rancher (kubernetes). Written in Node 20.17.0
+An app aiming to solve this issue: https://gitlab.ebrains.eu/kanban/curators/ebrains-curation-team/-/issues/129
+
+A vanilla javascript backend app (express node server) running on Rancher (kubernetes). Written in Node 20.17.0
 
 The app sends an automatic email to data custodian informing about submitted request to access externally hosted data.
 
@@ -11,7 +13,7 @@ Service account needs permision to access contact information of the data custod
 
 I created a ticket in Zammad for testing the application: https://support.humanbrainproject.eu/#ticket/zoom/24211. I assigned myself as an owner.
 
-The entry file of the application is serverEmailAutomat.js
+The entry file of the application is serverEmailAutomat.js (express node server).
 
 To launch the server:
 
@@ -56,7 +58,7 @@ $jsonBody = $body | ConvertTo-Json
 Invoke-RestMethod -Uri "http://localhost:4000/webhook" -Method POST -Headers $headers -Body $jsonBody
 ```
 
-# Using curl from command line in console from Browser Developer Tools:
+# Using console from Browser Developer Tools:
 
 ```
 fetch('http://localhost:4000/webhook', {
@@ -90,3 +92,42 @@ curl -X POST http://localhost:4000/webhook -H "Content-Type: application/json" -
 
 Authentication with OIDC client:
 https://github.com/HumanBrainProject/kg-core/blob/main/docs/authentication.md
+https://wiki.ebrains.eu/bin/view/Collabs/collaboratory-community-apps/Community%20App%20Developer%20Guide/Authenticating%20with%20your%20OIDC%20client%20and%20fetch%20collab%20user%20info/
+
+Collab oidc clients swagger:
+https://wiki.ebrains.eu/bin/view/Collabs/the-collaboratory/Documentation%20Wiki/API/
+
+Email replay:
+https://gitlab.ebrains.eu/ri/tech-hub/devops/docs/-/blob/main/Email_relay.md
+
+To test email sending using private gmail account, setup app password as described here:
+https://myaccount.google.com/apppasswords
+
+To deploy on Rancher:
+
+1. All env variable should be on place, it is not possible to change or add anything after deployment is complete.
+2. Follow this instruction for deployment: https://handbook.ebrains.eu/docs/technical-deep-dive/engineering/devops-practices/kubernetes/#issue-a-certificate-for-a-domain-under-appsebrainseu
+3. Setup namespace at Rancher, use github actions, install GitHub actions extension to VS code.
+4. Create .github folder in the root of the repository, add workflows folder and .yaml file where deployment process will be described.
+5. After container is deployed, setup service, sertificate and ingress
+6. URL should be approved by rancher admin
+
+The application is here:
+https://restrictedaccess.apps.ebrains.eu
+
+Get requests for health check can be sent here:
+https://restrictedaccess.apps.ebrains.eu/health
+
+Endpoint to send POST requests for webhook:
+https://restrictedaccess.apps.ebrains.eu/webhook
+
+The application entry file is: serverEmailAutomat.js
+
+email are sent from curation-support@ebrains.eu
+
+If a new ticket is received to the Share data group containing "Registration to ‘Request for externally hosted datasets’ (Ref." in the title, you should get a new post with the following JSON payload:
+
+{
+"ticket_no": "#{ticket.id}",
+"submission_url": ": https://nettskjema.no/user/form/127835/submission/{{ticket.title | regex_extract: 'Ref\\. (\\d+)', 1}}"
+}

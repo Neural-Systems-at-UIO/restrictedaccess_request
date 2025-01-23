@@ -61,7 +61,8 @@ app.get('/', async (req, res, next) => {
 // to test post requests
 app.post('/test', async (req, res) => {
     const jsonData = req.body;
-    logger.info(`incoming test post request: ${jsonData.message}`);
+    logger.info(`logging incoming test post request: ${jsonData.event}`);
+    console.log(`console logging incoming test post request: ${jsonData.data}`);
     res.json({ message: 'Data received successfully', data: jsonData });
     console.log('testing post requests to test endpoint');
 });

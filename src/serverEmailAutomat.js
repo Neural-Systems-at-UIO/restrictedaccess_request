@@ -76,12 +76,14 @@ app.post('/webhook', async (req, res) => {
     //logger.info(`webhook is fired: ${event}`);
     logger.info(`webhook is fired`);
     const data_webhook = req.body;
-    logger.info(`POST received: ${data_webhook}`);
-    res.json({ message: 'Webhook received successfully', data: data_webhook });
-    const submissionId = data_webhook.submission_url;  //get submission id and zammad ticket from webhook
-    const zammadTicket = data_webhook.ticket_no;
+    logger.info(`POST request received: ${data_webhook}`);
+    //res.json({ message: 'Webhook received successfully', data: data_webhook });
+    //const submissionId = data_webhook.submission_url;  //get submission id and zammad ticket from webhook
+    //const zammadTicket = data_webhook.ticket_no;
+    //const submissionId = 33139391;
+    const submissionId = data_webhook.data;
     logger.info(`requested nettskjema: ${submissionId}`);
-    logger.info(`Zammad ticket: ${zammadTicket}`);
+    //logger.info(`Zammad ticket: ${zammadTicket}`);
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
     try {  

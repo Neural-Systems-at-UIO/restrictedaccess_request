@@ -59,12 +59,17 @@ app.get('/', async (req, res, next) => {
 });
 
 // to test post requests
-app.post('/test', async (req, res) => {
+//change it back to test, and place webhook back
+app.post('/webhook', async (req, res) => {
     const jsonData = req.body;
-    logger.info(`logging incoming test post request: ${jsonData.event}`);
-    console.log(`console logging incoming test post request: ${jsonData.data}`);
-    res.json({ message: 'Data received successfully', data: jsonData });
-    console.log('testing post requests to test endpoint');
+    logger.info(`logging incoming test post request, ticket: ${jsonData.ticket_no}`);
+    logger.info(`logging incoming test post request, ticket: ${jsonData}`);
+    logger.info(`console logging incoming test post request: ${jsonData.submission_url}`);
+    console.log(`logging incoming test post request, ticket: ${jsonData}`);
+    console.log(`console logging incoming test post request: ${jsonData.submission_url}`);
+    console.log(`logging incoming test post request, ticket: ${jsonData.ticket_no}`);
+    //res.json({ message: 'Data received successfully', data: jsonData });
+    console.log('successfull test');
 });
 //to test get requests
 app.get('/health', async (req, res) => {
@@ -72,24 +77,21 @@ app.get('/health', async (req, res) => {
 });
 
 //the webhook endpoint
-app.post('/webhook', async (req, res) => {
+app.post('/test', async (req, res) => {
     //const event = req.body.event;   //modify this part accordingly when the weebhook is created
     //logger.info(`webhook is fired: ${event}`);
     logger.info(`webhook is fired`);
     const data_webhook = req.body;
     logger.info(`POST request received: ${data_webhook}`);
     //res.json({ message: 'Webhook received successfully', data: data_webhook });
-    //const submissionId = data_webhook.submission_url;  //get submission id and zammad ticket from webhook
-    //const zammadTicket = data_webhook.ticket_no;
-    //const submissionId = 33139391;
-    const submissionId = data_webhook.data;
-    logger.info(`requested nettskjema: ${submissionId}`);
-    //logger.info(`Zammad ticket: ${zammadTicket}`);
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
     try {  
-        const extractedSubmissionId = extractSubmissionId(submissionId);//I need subm id and zammad ticket number
-        //extract zammad ticket number from the webhook and put it in the email subject    
+        const submissionId = data_webhook.submission_url;  //to test Pauls webhook
+        const zammadTicket = data_webhook.ticket_no;//to test Pauls webhook
+        logger.info(`requested nettskjema: ${submissionId}`);
+        logger.info(`Zammad ticket: ${zammadTicket}`);
+        const extractedSubmissionId = extractSubmissionId(submissionId);//I need subm id and zammad ticket number   
         //const zammadTicket = 'test_mayas_app [Ticket#4824171]'; //this needs to be changed dynamically (get zammad ticket info from zammad webhook)
         logger.info(`nettskjema request was received, submission id: ${extractedSubmissionId}`);
         const tokenNettskjema = await fetchToken();
@@ -135,6 +137,7 @@ app.post('/webhook', async (req, res) => {
         }
     } catch (error) {
         logger.error(`Something is not working:`, error);
+        //add here sending emails to my email notifying that something is not working 
     }; 
     res.status(200).json({ status: 'success', received: data });
 });

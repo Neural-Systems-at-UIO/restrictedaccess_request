@@ -1,42 +1,33 @@
-//vanilla javascript server (ES8)
 import express from 'express';
 import path from 'path';
+import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhook} from './sendEmailOnWebhook.js';
 import {htmlPageContent} from './mainPageContent.js';
 import {fetchSubmission, fetchAnswers, fetchPosition} from './fetchNettskjemaData.js';
 import {getRequestOptions} from './kgAuthentication.js';
-import {contactInfoKG} from './contactDataKG.js';
-//import {modifyUrlPath} from './changeUrl.js';
+import {contactInfoKG} from './contactDataKG.js'; 
 import {extractSubmissionId} from './changeUrl.js';
-import dotenv from 'dotenv';
 import logger from './logger.js';
+import {errorNotification} from './sendErrorNotification.js'; 
+//import {modifyUrlPath} from './changeUrl.js'; 
+//intended to send the data link to the data custodian, but emails get spam filtered
+
 dotenv.config(); 
 
-// Get __dirname with ESModules
+//work around for ECMAScript modules (ESM)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-//app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 5000;
 
-//to log post requests from zammad webhook or tests
 app.use((req, res, next) => {
     logger.info(`${req.method} ${req.url}`);
     next();
 });
-
-//use my ebrain account for testing  -- replace with service account and getRequestOptions()
-//const maya_token = process.env.MAYA_EBRAIN_TOKEN;
-//const token_maya = "Bearer " + maya_token;
-//const myHeaders = new Headers();
-//myHeaders.append("Content-Type", "application/json");
-//myHeaders.append("Authorization", token_maya);    
-//myHeaders.append("Accept", '*/*');
-//const mayaHeaders = {headers: myHeaders};
 
 app.use((err, req, res, next) => {
     logger.error(`Error: ${err.message}`);
@@ -48,6 +39,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 async function mainAppPage() {
     return htmlPageContent;
 }
+
 app.get('/', async (req, res, next) => {
     try {
         const data = await mainAppPage();
@@ -58,32 +50,42 @@ app.get('/', async (req, res, next) => {
     }
 });
 
-// to test post requests
-//change it back to test, and place webhook back
-app.post('/webhook', async (req, res) => {
-    const jsonData = req.body;
-    logger.info(`logging incoming test post request, ticket: ${jsonData.ticket_no}`);
-    logger.info(`logging incoming test post request, ticket: ${jsonData}`);
-    logger.info(`console logging incoming test post request: ${jsonData.submission_url}`);
-    console.log(`logging incoming test post request, ticket: ${jsonData}`);
-    console.log(`console logging incoming test post request: ${jsonData.submission_url}`);
-    console.log(`logging incoming test post request, ticket: ${jsonData.ticket_no}`);
-    //res.json({ message: 'Data received successfully', data: jsonData });
-    console.log('successfull test');
-});
-//to test get requests
+//to test if app is working - get requests
 app.get('/health', async (req, res) => {
     res.status(200).json({ status: 'UP' });
 });
 
-//the webhook endpoint
-app.post('/test', async (req, res) => {
+// to test post requests
+//change it back to test, and place webhook back
+app.post('/webhook', async (req, res) => {
+    const jsonData = req.body;
     //const event = req.body.event;   //modify this part accordingly when the weebhook is created
     //logger.info(`webhook is fired: ${event}`);
+    //logger.info(`logging incoming test post request, ticket: ${jsonData.ticket_no}`);
+    logger.info(`logging incoming test post request, ticket: ${jsonData}`);
+    //logger.info(`console logging incoming test post request: ${jsonData.submission_url}`);
+    console.log(`logging incoming test post request, ticket: ${jsonData}`);
+    //console.log(`console logging incoming test post request: ${jsonData.submission_url}`);
+    //console.log(`logging incoming test post request, ticket: ${jsonData.ticket_no}`);
+    //res.json({ message: 'Data received successfully', data: jsonData });
+    console.log('successfull test');
+});
+
+//use my ebrain token for testing 
+//const maya_token = process.env.MAYA_EBRAIN_TOKEN;
+//const token_maya = "Bearer " + maya_token;
+//const myHeaders = new Headers();
+//myHeaders.append("Content-Type", "application/json");
+//myHeaders.append("Authorization", token_maya);    
+//myHeaders.append("Accept", '*/*');
+//const mayaHeaders = {headers: myHeaders};
+
+//the main endpoint that will receive webhook
+app.post('/test', async (req, res) => {
     logger.info(`webhook is fired`);
     const data_webhook = req.body;
     logger.info(`POST request received: ${data_webhook}`);
-    //res.json({ message: 'Webhook received successfully', data: data_webhook });
+    console.log(`POST request received: ${data_webhook}`);
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
     try {  
@@ -91,8 +93,9 @@ app.post('/test', async (req, res) => {
         const zammadTicket = data_webhook.ticket_no;//to test Pauls webhook
         logger.info(`requested nettskjema: ${submissionId}`);
         logger.info(`Zammad ticket: ${zammadTicket}`);
-        const extractedSubmissionId = extractSubmissionId(submissionId);//I need subm id and zammad ticket number   
-        //const zammadTicket = 'test_mayas_app [Ticket#4824171]'; //this needs to be changed dynamically (get zammad ticket info from zammad webhook)
+        const extractedSubmissionId = extractSubmissionId(submissionId);   
+        //const zammadTicket = 'test_mayas_app [Ticket#4824171]';
+        //const zammadTicket = '[Ticket#4824171]';  //I need to test the format of the email subject
         logger.info(`nettskjema request was received, submission id: ${extractedSubmissionId}`);
         const tokenNettskjema = await fetchToken();
         logger.info("token for nettskjema is fetched successfully");
@@ -101,9 +104,9 @@ app.post('/test', async (req, res) => {
         const datasetID = await fetchAnswers(submissionData);
         logger.info(`requested dataset id: ${datasetID}`);
 
-        //replace here mayaHeaders with requestOptions and dedicated service account
+        //mayaHeaders - for personal token, requestOptions - for dedicated service account
         const requestOptions = await getRequestOptions();
-        //for testing I was using my own KG token (copied after login from https://editor.kg.ebrains.eu/)
+        //for testing I was using my own KG token (copy-pasted from https://editor.kg.ebrains.eu/)
         //const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, mayaHeaders);
         const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, requestOptions);
         logger.info("successfully fetched contact info from KG");
@@ -130,16 +133,24 @@ app.post('/test', async (req, res) => {
         
         if (emailCustodian['email'].length>0){
         sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no');
-        //sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, modifiedUrl, nameCustodian, surnameCustodian, emailCustodian['email']);
+        //sendEmailOnWebhook(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, zammadTicket, nameCustodian, surnameCustodian, emailCustodian['email']);
         //in prod: replace my uio email by the email of the custodian: emailCustodian['email']
         }else{
             throw new Error('Custodian of the dataset did not provide contact information.');
         }
     } catch (error) {
         logger.error(`Something is not working:`, error);
+        const logFilePath = path.resolve(__dirname, '../restrictedaccess.log');
+        console.log(logFilePath);
+        const emailSupport = 'maya.kobchenko@medisin.uio.no';
+        const zammadTicket = 'test_mayas_app [Ticket#4824171]'; //for testing use the same test ticket
+        //replace in prod by the ticket corresponding to request
+        const submissionId = "https://nettskjema.no/user/form/127835/submission/33139391";//for testing
+        await errorNotification(zammadTicket, submissionId, logFilePath, emailSupport);
         //add here sending emails to my email notifying that something is not working 
     }; 
-    res.status(200).json({ status: 'success', received: data });
+    //response to the webhook - not needed in production
+    //res.status(200).json({ status: 'success', received: data });
 });
 
 app.listen(port, async () => {

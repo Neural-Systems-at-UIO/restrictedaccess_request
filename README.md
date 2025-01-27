@@ -55,7 +55,7 @@ $body = @{
      data = @{submission_id = "https://nettskjema.no/user/form/127835/submission/33139391"}
  }
 $jsonBody = $body | ConvertTo-Json
-Invoke-RestMethod -Uri "http://localhost:4000/webhook" -Method POST -Headers $headers -Body $jsonBody
+Invoke-RestMethod -Uri "http://localhost:5000/webhook" -Method POST -Headers $headers -Body $jsonBody
 ```
 
 # Using console from Browser Developer Tools:
@@ -88,6 +88,10 @@ fetch('http://localhost:4000/webhook', {
 
 ```
 curl -X POST http://localhost:4000/webhook -H "Content-Type: application/json" -d '{"event":"test event"}'
+```
+
+```
+https://restrictedaccess.apps.ebrains.eu/webhook?trials=testwebhook
 ```
 
 Authentication with OIDC client:

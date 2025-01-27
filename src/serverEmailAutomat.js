@@ -22,7 +22,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 4000;
 
 app.use((req, res, next) => {
     logger.info(`${req.method} ${req.url}`);

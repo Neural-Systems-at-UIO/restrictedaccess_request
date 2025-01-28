@@ -62,12 +62,15 @@ app.post('/webhook', async (req, res) => {
     //const event = req.body.event;   //modify this part accordingly when the weebhook is created
     //logger.info(`webhook is fired: ${event}`);
     //logger.info(`logging incoming test post request, ticket: ${jsonData.ticket_no}`);
-    logger.info(`logging incoming test post request, ticket: ${jsonData}`);
+    logger.info(`logging incoming test post request`);
     //logger.info(`console logging incoming test post request: ${jsonData.submission_url}`);
-    console.log(`logging incoming test post request, ticket: ${jsonData}`);
+    console.log(`console logging incoming test post request`);
     //console.log(`console logging incoming test post request: ${jsonData.submission_url}`);
     //console.log(`logging incoming test post request, ticket: ${jsonData.ticket_no}`);
     //res.json({ message: 'Data received successfully', data: jsonData });
+    const jsonString = JSON.stringify(jsonData, null, 2);
+    console.log('Received JSON:', jsonString);
+    logger.info(`POST request received: ${jsonString}`);
     console.log('successfull test');
 });
 

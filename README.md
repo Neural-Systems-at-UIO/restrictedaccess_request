@@ -148,3 +148,7 @@ $body = @{
 $jsonBody = $body | ConvertTo-Json
 Invoke-RestMethod -Uri "https://restrictedaccess.apps.ebrains.eu/webhook" -Method POST -Headers $headers -Body $jsonBody
 ```
+
+Postman:
+
+https://restrictedaccess.apps.ebrains.eu/webhook?trials=testwebhook

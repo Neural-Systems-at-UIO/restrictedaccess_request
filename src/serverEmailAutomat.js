@@ -72,6 +72,7 @@ app.post('/webhook', async (req, res) => {
     console.log('Received JSON:', jsonString);
     logger.info(`POST request received: ${jsonString}`);
     console.log('successfull test');
+    res.status(200).json({ status: 'success', received: data });
 });
 
 //use my ebrain token for testing 

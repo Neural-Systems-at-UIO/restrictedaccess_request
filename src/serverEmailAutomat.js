@@ -72,6 +72,7 @@ app.post('/webhook', async (req, res) => {
     console.log('Received JSON:', jsonString);
     logger.info(`POST request received: ${jsonString}`);
     console.log('successfull test');
+    //zammad webhook sends 5 post requests. I will try to send response to stop posting
     res.status(200).json({ status: 'success', received: data });
 });
 

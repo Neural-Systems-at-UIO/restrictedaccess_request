@@ -73,7 +73,7 @@ app.post('/webhook', async (req, res) => {
     logger.info(`POST request received: ${jsonString}`);
     console.log('successfull test');
     //zammad webhook sends 5 post requests. I will try to send response to stop posting
-    res.status(200).json({ status: 'success', received: data });
+    res.status(200).json({ status: 'success', received: jsonData });
 });
 
 //use my ebrain token for testing 

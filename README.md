@@ -11,8 +11,6 @@ Users send requests using nettskjema (id=127835), where they provide dataset tit
 In order to fetch information from the Knowledge Graph API, we set up a service account as described here: https://docs.kg.ebrains.eu/8387ccd27a186dea3dd0b949dc528842/authentication.html#how-to-get-your-token
 Service account needs permision to access contact information of the data custodians in both spaces: "RELEASED" and "IN_PROGRESS".
 
-I created a ticket in Zammad for testing the application: https://support.humanbrainproject.eu/#ticket/zoom/24211. I assigned myself as an owner.
-
 The entry file of the application is serverEmailAutomat.js (express node server).
 
 To launch the server:
@@ -27,7 +25,7 @@ In development mode:
 $ npm run dev
 ```
 
-Check in webbrowser:
+In local webbrowser:
 
 ```
 http://localhost:4000/
@@ -36,7 +34,7 @@ http://localhost:4000/
 Using KG editor, we manually defined a query named "fetch_data_custodian_info" to fetch information about requested datasets.  
 The defined query: https://query.kg.ebrains.eu/queries/de7e79ae-5b67-47bf-b8b0-8c4fa830348e
 
-To test if the application is running, type in PowerShell:
+To test a webhook, type in PowerShell:
 
 ```
 $headers = @{"Content-Type" = "application/json"}
@@ -46,16 +44,16 @@ $jsonBody = $body | ConvertTo-Json
 Invoke-RestMethod -Uri "http://localhost:4000/test" -Method POST -Headers $headers -Body $jsonBody
 ```
 
-To try if application reacts to webhook, in PowerShell:
+To try a webhook endpoint, in PowerShell:
 
 ```
 $headers = @{"Content-Type" = "application/json"}
 $body = @{
      event = "data request"
-     data = @{submission_id = "https://nettskjema.no/user/form/127835/submission/33139391"}
+     data = @{submission_id = "https://nettskjema.no/user/form/127835/submission/{submission_id}}"}
  }
 $jsonBody = $body | ConvertTo-Json
-Invoke-RestMethod -Uri "http://localhost:5000/webhook" -Method POST -Headers $headers -Body $jsonBody
+Invoke-RestMethod -Uri "http://localhost:4000/webhook" -Method POST -Headers $headers -Body $jsonBody
 ```
 
 # Using console from Browser Developer Tools:
@@ -69,7 +67,7 @@ fetch('http://localhost:4000/webhook', {
   body: JSON.stringify({
     event: 'test event',
     data: {
-      submission_id: 'https://nettskjema.no/user/form/127835/submission/33139391'
+      submission_id: 'https://nettskjema.no/user/form/127835/submission/{submission_id}'
     }
   })
 })
@@ -85,10 +83,6 @@ fetch('http://localhost:4000/webhook', {
 ```
 
 # using Postman:
-
-```
-curl -X POST http://localhost:4000/webhook -H "Content-Type: application/json" -d '{"event":"test event"}'
-```
 
 ```
 https://restrictedaccess.apps.ebrains.eu/webhook?trials=testwebhook
@@ -111,10 +105,8 @@ To deploy on Rancher:
 
 1. All env variable should be on place, it is not possible to change or add anything after deployment is complete.
 2. Follow this instruction for deployment: https://handbook.ebrains.eu/docs/technical-deep-dive/engineering/devops-practices/kubernetes/#issue-a-certificate-for-a-domain-under-appsebrainseu
-3. Setup namespace at Rancher, use github actions, install GitHub actions extension to VS code.
-4. Create .github folder in the root of the repository, add workflows folder and .yaml file where deployment process will be described.
-5. After container is deployed, setup service, sertificate and ingress
-6. URL should be approved by rancher admin
+   And here: https://github.com/ehennestad/ebrains_wizard_eh/wiki/Workflow:-Build-and-Push-Dev-Image
+3. Setup namespace at Rancher, use github actions, install GitHub actions extension to VS code. 4. Create .github folder in the root of the repository, add workflows folder and .yaml file where deployment process will be described. 5. After container is deployed, setup service, sertificate and ingress 6. URL should be approved by rancher admin
 
 The application is here:
 https://restrictedaccess.apps.ebrains.eu
@@ -127,32 +119,21 @@ https://restrictedaccess.apps.ebrains.eu/webhook
 
 The application entry file is: serverEmailAutomat.js
 
-email are sent from curation-support@ebrains.eu
-
-If a new ticket is received to the Share data group containing "Registration to ‘Request for externally hosted datasets’ (Ref." in the title, you should get a new post with the following JSON payload:
-
-{
-"ticket_no": "#{ticket.id}",
-"submission_url": ": https://nettskjema.no/user/form/127835/submission/{{ticket.title | regex_extract: 'Ref\\. (\\d+)', 1}}"
-}
-https://nettskjema.no/user/form/127835/submission/{{ticket.title | regex_extract: 'Ref\\. (\\d+)', 1}}"
-
 To try if application reacts to webhook, in PowerShell:
 
 ```
 $headers = @{"Content-Type" = "application/json"}
 $body = @{
      event = "data request"
-     data = @{submission_id = "https://nettskjema.no/user/form/127835/submission/33139391"}
+     data = @{submission_id = "https://nettskjema.no/user/form/127835/submission/{submission_id}}"}
  }
 $jsonBody = $body | ConvertTo-Json
 Invoke-RestMethod -Uri "https://restrictedaccess.apps.ebrains.eu/webhook" -Method POST -Headers $headers -Body $jsonBody
 ```
 
-Postman:
-
+For testing using Postman:
 https://restrictedaccess.apps.ebrains.eu/webhook?trials=testwebhook
-
 http://localhost:4000/webhook?trials=testwebhook
 
-tools for web design: https://wave.webaim.org/
+emails are sent via Zammad api
+https://docs.zammad.org/en/latest/api/ticket/articles.html#create

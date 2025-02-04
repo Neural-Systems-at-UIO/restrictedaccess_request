@@ -106,7 +106,11 @@ To deploy on Rancher:
 1. All env variable should be on place, it is not possible to change or add anything after deployment is complete.
 2. Follow this instruction for deployment: https://handbook.ebrains.eu/docs/technical-deep-dive/engineering/devops-practices/kubernetes/#issue-a-certificate-for-a-domain-under-appsebrainseu
    And here: https://github.com/ehennestad/ebrains_wizard_eh/wiki/Workflow:-Build-and-Push-Dev-Image
-3. Setup namespace at Rancher, use github actions, install GitHub actions extension to VS code. 4. Create .github folder in the root of the repository, add workflows folder and .yaml file where deployment process will be described. 5. After container is deployed, setup service, sertificate and ingress 6. URL should be approved by rancher admin
+   Harbor Docker Registry: https://docker-registry.ebrains.eu/harbor/
+3. Setup namespace at Rancher, use github actions, install GitHub actions extension to VS code.
+4. Create .github folder in the root of the repository, add workflows folder and .yaml file where deployment process will be described.
+5. After container is deployed, setup service, sertificate and ingress
+6. URL should be approved by rancher admin
 
 The application is here:
 https://restrictedaccess.apps.ebrains.eu

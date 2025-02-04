@@ -1,5 +1,5 @@
-import 'dotenv/config';
-import {generateEmailHtml} from './htmlEmail.js';
+import dotenv from 'dotenv';
+import {emailHtmlText} from './htmlEmail.js';
 import logger from './logger.js';
 import fetch from 'node-fetch';
 dotenv.config();
@@ -11,7 +11,7 @@ const urlSendEmail = `${zammadBaseUrl}/api/v1/ticket_articles`;
 
 export async function sendEmailOnWebhookZammad(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, ticketId, nameCustodian, surnameCustodian, emailCustodian) { 
     //text of the email to the data custodian
-    const emailHtml = generateEmailHtml(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, nameCustodian, surnameCustodian);
+    const emailHtml = emailHtmlText(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, nameCustodian, surnameCustodian);
     const content = {
         "ticket_id": ticketId,  
         "subject": "Data access request",

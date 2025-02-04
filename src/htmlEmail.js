@@ -1,4 +1,4 @@
-export default function generateEmailHtml(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, nameCustodian, surnameCustodian) {
+export function emailHtmlText(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, nameCustodian, surnameCustodian) {
     return  `
     <!DOCTYPE html>
     <html>

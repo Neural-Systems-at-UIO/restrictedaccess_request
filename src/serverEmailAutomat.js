@@ -58,7 +58,7 @@ app.get('/health', async (req, res) => {
 
 // to test post requests
 //change it back to test, and place webhook back
-app.post('/webhook', async (req, res) => {
+app.post('/test', async (req, res) => {
     //const event = req.body.event;  
     const testData = req.body;
     logger.info('Incoming post request from the test endpoint');
@@ -77,7 +77,7 @@ app.post('/webhook', async (req, res) => {
 //const mayaHeaders = {headers: myHeaders};
 
 //the main endpoint that will receive webhook
-app.post('/test', async (req, res) => {
+app.post('/webhook', async (req, res) => {
     const jsonData = req.body;
     logger.info('New post request');
     //zammad webhook sends 5 post requests, need to send response to stop posting

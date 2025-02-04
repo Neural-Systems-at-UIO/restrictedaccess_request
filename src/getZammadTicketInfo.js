@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
+import logger from './logger.js';
 dotenv.config();
 
 const maya_token = process.env.MAYA_ZAMMAD_TOKEN;

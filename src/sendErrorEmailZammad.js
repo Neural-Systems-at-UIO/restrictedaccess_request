@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import {notificationError} from './htmlNotificationError.js'; 
 import logger from './logger.js';
 import fetch from 'node-fetch';

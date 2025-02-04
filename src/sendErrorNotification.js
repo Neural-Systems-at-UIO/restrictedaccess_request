@@ -1,3 +1,4 @@
+//dont use gmail, use zammad 
 import 'dotenv/config';
 import nodemailer from 'nodemailer';
 import {notificationError} from './htmlNotificationError.js'; 

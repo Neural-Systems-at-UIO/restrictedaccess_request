@@ -24,11 +24,12 @@ export async function zammadTicket (ticketId) {
         const ticketNumber = data.number;
         const isTicket = dataTitle.includes(searchTitle);
         let refNumber = null;
-        //const regex = /(?<=Ref\.?\s?)\d+/;
-        const regex = /\(Ref\.?\s*(\d+)\)/;
+        const regex = /(?<=Ref\.?\s?)\d+/;
+        //const regex = /\(Ref\.?\s*(\d+)\)/;
         const match = dataTitle.match(regex);
         if (isTicket) {
-            refNumber = match[1];
+            refNumber = match[0];
+            //refNumber = match[1];
             logger.info(`Submitted nettskjema id: ${refNumber}`);
         } else {
             logger.info('Could not find nettskjema id in the ticket');

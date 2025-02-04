@@ -9,7 +9,7 @@ import {fetchSubmission, fetchAnswers, fetchPosition} from './fetchNettskjemaDat
 import {getRequestOptions} from './kgAuthentication.js';
 import {contactInfoKG} from './contactDataKG.js'; 
 import logger from './logger.js';
-import {errorNotification} from './sendErrorNotification.js'; 
+import {errorNotificationZammad} from './sendErrorEmailZammad.js'; 
 import {zammadTicket} from './getZammadTicketInfo.js';
 //intended to send the data link to the data custodian, but emails get spam filtered
 //changed the webhook playload, no need for extractSubmissionId
@@ -151,7 +151,7 @@ app.post('/webhook', async (req, res) => {
         //replace in prod by the testTicket by ticketNumber
         //const submissionId = "33139391";//for testing
         const testTicketId = 24211; //my test ticket in zammad
-        await errorNotification(ticketId, testTicketId, testTicketSubject, submissionId, logFilePath, emailSupport);
+        await errorNotificationZammad(ticketId, testTicketId, testTicketSubject, submissionId, logFilePath, emailSupport);
         //add here sending emails to my email notifying that something is not working 
     }; 
 });

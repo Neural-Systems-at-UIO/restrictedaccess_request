@@ -147,11 +147,10 @@ app.post('/webhook', async (req, res) => {
         logger.error(`Something is not working:`, error);
         const logFilePath = path.resolve(__dirname, '../restrictedaccess.log');
         const emailSupport = 'maya.kobchenko@medisin.uio.no'; //forward notification to my email
-        const testTicketSubject = 'test_mayas_app [Ticket#4824171]'; //for testing use the same test ticket
-        //replace in prod by the testTicket by ticketNumber
+        //const testTicketSubject = 'test_mayas_app [Ticket#4824171]'; //my test ticket
         //const submissionId = "33139391";//for testing
         const testTicketId = 24211; //my test ticket in zammad
-        await errorNotificationZammad(ticketId, testTicketId, testTicketSubject, submissionId, logFilePath, emailSupport);
+        await errorNotificationZammad(ticketId, testTicketId, submissionId, logFilePath, emailSupport);
         //add here sending emails to my email notifying that something is not working 
     }; 
 });

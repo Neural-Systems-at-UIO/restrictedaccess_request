@@ -9,20 +9,19 @@ const token_maya = "Bearer " + maya_token;
 const zammadBaseUrl = 'https://support.humanbrainproject.eu/';
 const urlSendEmail = `${zammadBaseUrl}/api/v1/ticket_articles`;
 
-export async function errorNotificationZammad(ticketId, testTicketId, testTicketSubject, submissionId, logFilePath, emailSupport) { 
+export async function errorNotificationZammad(ticketId, testTicketId, submissionId, logFilePath, emailSupport) { 
     //text of the email to the data custodian
     const emailHtml = notificationError(ticketId, submissionId);
     const content = {
         "ticket_id": testTicketId,  
-        "subject": testTicketSubject,
+        "subject": "app error",
         "body": emailHtml,
         "content_type": "text/html",
         "type": "email",
         "internal": "false",
         "sender": "Agent",
         "time_unit": "0",
-        "origin_by_id": "1292",
-        "to": emailSupport,  //data custodian email
+        "to": emailSupport, 
         "attachments": [
             {
                 filename: 'restrictedaccess.log',

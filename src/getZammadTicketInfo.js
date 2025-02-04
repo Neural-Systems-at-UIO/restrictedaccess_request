@@ -21,6 +21,7 @@ export async function zammadTicket (ticketId) {
         const response = await fetch(articleUrl, mayaHeaders); 
         const data = await response.json();
         const dataTitle = data.title;
+        logger.info(`Submitted ticket title in zammad: ${dataTitle}`);
         const ticketNumber = data.number;
         const isTicket = dataTitle.includes(searchTitle);
         let refNumber = null;

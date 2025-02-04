@@ -1,4 +1,4 @@
-//this was used to test zammad api
+//this was used to test zammad api, not in the app itself
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
 dotenv.config();

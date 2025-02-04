@@ -23,9 +23,10 @@ export async function zammadTicket (ticketId) {
         const dataTitle = data.title;
         const ticketNumber = data.number;
         const isTicket = dataTitle.includes(searchTitle);
+        console.log(dataTitle);
         const regex = /(?<=Ref\.?\s?)\d+/;
         const match = dataTitle.match(regex);
-        if (match) {
+        if (isTicket) {
             const refNumber = match[0];
             logger.info(`Submitted nettskjema id: ${refNumber}`);
         } else {

@@ -17,7 +17,7 @@ export function replyEmailHtml(contactPersonName, dataTitle, dataset_uuid) {
         
         <p><br></p>
         <p>Best regards,<p/>
-        <p>---<br>
+        <p>
         EBRAINS Data Curation Support <br>
         curation-support@ebrains.eu <br>
         https://www.ebrains.eu/ <br>

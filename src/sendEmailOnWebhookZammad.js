@@ -21,6 +21,7 @@ export async function sendEmailOnWebhookZammad(contactPersonName, recipientEmail
         "internal": "false",
         "sender": "Agent",
         "time_unit": "0",
+        //"internal": true,  //set true if wnat to be hidden from external user
         // "from":"curation-support@ebrains.eu", -- fails at SMTP
         "origin_by_id": "1292",
         "to": emailCustodian  //data custodian email

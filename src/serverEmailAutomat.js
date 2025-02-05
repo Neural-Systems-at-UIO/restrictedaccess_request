@@ -139,8 +139,9 @@ app.post('/webhook', async (req, res) => {
                 //sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, datasetID, ticketId, nameCustodian, surnameCustodian, emailCustodian['email']);
                 //in prod: replace my uio email by the email of the custodian: emailCustodian['email']; replace my test ticket by actuall ticketId of the request
                 //reply to the person that requested data
-                sendReply(respondentName, 'maya.kobchenko@medisin.uio.no', dataTitle, datasetID, ticketId);
-                //sendReply(contactPersonName, recipientEmail, dataTitle, datasetID, ticketId); //in prod
+                //set to internal (locked) if you want to hide the thread
+                sendReply(respondentName, 'maya.kobchenko@medisin.uio.no', dataTitle, datasetID, testTicketId);
+                //sendReply(respondentName, recipientEmail, dataTitle, datasetID, ticketId); //in prod
             } else {
                 throw new Error('Custodian of the dataset did not provide contact information.');
             }

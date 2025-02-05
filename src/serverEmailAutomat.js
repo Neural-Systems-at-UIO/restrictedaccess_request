@@ -141,7 +141,7 @@ app.post('/webhook', async (req, res) => {
                 //reply to the person that requested data
                 //set to internal (locked) if you want to hide the thread
                 sendReply(respondentName, 'maya.kobchenko@medisin.uio.no', dataTitle, datasetID, testTicketId);
-                //sendReply(respondentName, recipientEmail, dataTitle, datasetID, ticketId); //in prod
+                //sendReply(respondentName, respondentEmail, dataTitle, datasetID, ticketId); //in prod
             } else {
                 throw new Error('Custodian of the dataset did not provide contact information.');
             }

@@ -12,7 +12,7 @@ export function replyEmailHtml(contactPersonName, dataTitle, dataset_uuid) {
         <p>We have received your data access request for the following human dataset published on EBRAINS:</p>
         <p>${dataTitle}.</p>
         <p>https://search.kg.ebrains.eu/instances/${dataset_uuid}</p>
-
+        <p><br></p>
         <p>Thank you for your interest in these data. We have forwarded your request to the data custodian, so that they can get in touch with you and agree on the conditions for sharing the data.</p>
         
         <p><br></p>

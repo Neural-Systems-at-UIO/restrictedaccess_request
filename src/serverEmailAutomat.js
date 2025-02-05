@@ -139,7 +139,7 @@ app.post('/webhook', async (req, res) => {
                 //sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, datasetID, ticketId, nameCustodian, surnameCustodian, emailCustodian['email']);
                 //in prod: replace my uio email by the email of the custodian: emailCustodian['email']; replace my test ticket by actuall ticketId of the request
                 //reply to the person that requested data
-                sendReply(contactPersonName, 'maya.kobchenko@medisin.uio.no', dataTitle, datasetID, ticketId);
+                sendReply(respondentName, 'maya.kobchenko@medisin.uio.no', dataTitle, datasetID, ticketId);
                 //sendReply(contactPersonName, recipientEmail, dataTitle, datasetID, ticketId); //in prod
             } else {
                 throw new Error('Custodian of the dataset did not provide contact information.');

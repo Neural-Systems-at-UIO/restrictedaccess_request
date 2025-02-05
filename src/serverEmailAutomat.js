@@ -90,7 +90,8 @@ app.post('/webhook', async (req, res) => {
     logger.info(`Received JSON: ${jsonString}`);
     const ticketId = jsonData.ticket_id;
     logger.info(`Incoming post request, zammad ticket id: ${ticketId}`);
-    const {isTicket, ticketNumber, submissionId} = await zammadTicket(ticketId);
+    const {isTicket, ticketNumber, nettskjemaId} = await zammadTicket(ticketId);
+    const submissionId = Number(nettskjemaId);
     logger.info(`Zammad ticket number: ${ticketNumber}, is it data access request: ${isTicket}`);
     logger.info(`Submitted nettskjema: ${submissionId}`);
     //we created a query manually in KG editor named = fetch_data_custodian_info

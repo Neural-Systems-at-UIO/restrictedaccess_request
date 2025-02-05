@@ -1,3 +1,4 @@
+//another way to send emails
 import 'dotenv/config';
 import nodemailer from 'nodemailer';
 import {generateEmailHtml} from './htmlEmail.js';

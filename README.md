@@ -82,12 +82,6 @@ fetch('http://localhost:4000/webhook', {
 
 ```
 
-# using Postman:
-
-```
-https://restrictedaccess.apps.ebrains.eu/webhook?trials=testwebhook
-```
-
 Authentication with OIDC client:
 https://github.com/HumanBrainProject/kg-core/blob/main/docs/authentication.md
 https://wiki.ebrains.eu/bin/view/Collabs/collaboratory-community-apps/Community%20App%20Developer%20Guide/Authenticating%20with%20your%20OIDC%20client%20and%20fetch%20collab%20user%20info/

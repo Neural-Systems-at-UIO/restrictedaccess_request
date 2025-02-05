@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import {emailHtmlText} from './htmlEmail.js';
+import {replyEmailHtml} from './htmlEmailReply.js';
 import logger from './logger.js';
 import fetch from 'node-fetch';
 dotenv.config();
@@ -9,9 +9,9 @@ const token_maya = "Bearer " + maya_token;
 const zammadBaseUrl = 'https://support.humanbrainproject.eu/';
 const urlSendEmail = `${zammadBaseUrl}/api/v1/ticket_articles`;
 
-export async function sendEmailOnWebhookZammad(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, dataset_uuid, ticketId, nameCustodian, surnameCustodian, emailCustodian) { 
+export async function sendReply(contactPersonName, recipientEmail, dataTitle, dataset_uuid, ticketId) { 
     //text of the email to the data custodian
-    const emailHtml = emailHtmlText(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, dataset_uuid, nameCustodian, surnameCustodian);
+    const emailHtml = replyEmailHtml(contactPersonName, dataTitle, dataset_uuid);
     const content = {
         "ticket_id": ticketId,  
         "subject": "Data access request",
@@ -23,7 +23,7 @@ export async function sendEmailOnWebhookZammad(contactPersonName, recipientEmail
         "time_unit": "0",
         // "from":"curation-support@ebrains.eu", -- fails at SMTP
         "origin_by_id": "1292",
-        "to": emailCustodian  //data custodian email
+        "to": recipientEmail  //data requester email
     };
     try {
         const response = await fetch(urlSendEmail, {
@@ -33,12 +33,12 @@ export async function sendEmailOnWebhookZammad(contactPersonName, recipientEmail
         });
         const data = await response.json();
         if (response.ok) {
-            logger.info(`Email is sent to the data custodian, message id: ${data.message_id}`);
+            logger.info(`Reply is sent: message id: ${data.message_id}`);
         }
         else {
-            throw new Error('Error sending email to the data custodian: ' + response.status);
+            throw new Error('Error sending reply: ' + response.status);
         }
     } catch (error) {
-        throw new Error(`Error sending email: ${error.message}`);
+        throw new Error(`Error sending email to the person requested data access: ${error.message}`);
     }
 };

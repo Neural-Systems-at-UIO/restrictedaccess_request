@@ -1,4 +1,4 @@
-export function emailHtmlText(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, nameCustodian, surnameCustodian) {
+export function emailHtmlText(contactPersonName, recipientEmail, positionContact, institution, departm, purposeAccess, dataTitle, dataset_uuid, nameCustodian, surnameCustodian) {
     return  `
     <!DOCTYPE html>
     <html>
@@ -8,6 +8,7 @@ export function emailHtmlText(contactPersonName, recipientEmail, positionContact
 
         <p>We have received a data access request for the following human dataset published on EBRAINS under your custodianship:</p>
         <p>${dataTitle}.</p>
+        <p>https://search.kg.ebrains.eu/instances/${dataset_uuid}</p>
 
         <p>Requester: ${contactPersonName}, ${positionContact}, ${departm}, ${institution}, email: ${recipientEmail}<p/>
 

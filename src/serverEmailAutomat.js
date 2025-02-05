@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import {fetchToken} from './tokenFetcher.js';
 import {sendEmailOnWebhookZammad} from './sendEmailOnWebhookZammad.js';
 import {htmlPageContent} from './mainPageContent.js';
@@ -11,6 +12,8 @@ import {contactInfoKG} from './contactDataKG.js';
 import logger from './logger.js';
 import {errorNotificationZammad} from './sendErrorEmailZammad.js'; 
 import {zammadTicket} from './getZammadTicketInfo.js';
+import { sendReply } from './sendReplyRequester.js';
+
 //intended to send the data link to the data custodian, but emails get spam filtered
 //changed the webhook playload, no need for extractSubmissionId
 //import {modifyUrlPath, extractSubmissionId} from './changeUrl.js'; 
@@ -80,22 +83,20 @@ app.post('/test', async (req, res) => {
 //the main endpoint that will receive webhook
 app.post('/webhook', async (req, res) => {
     const jsonData = req.body;
-    logger.info('New post request');
+    logger.info('New zammad webhook post request');
     //zammad webhook sends 5 post requests, need to send response to stop posting
     res.status(200).json({ status: 'success', received: jsonData });
     const jsonString = JSON.stringify(jsonData, null, 2);
     logger.info(`Received JSON: ${jsonString}`);
     const ticketId = jsonData.ticket_id;
-    logger.info(`Incoming post request, ticket id: ${ticketId}`);
+    logger.info(`Incoming post request, zammad ticket id: ${ticketId}`);
     const {isTicket, ticketNumber, submissionId} = await zammadTicket(ticketId);
     logger.info(`Zammad ticket number: ${ticketNumber}, is it data access request: ${isTicket}`);
     logger.info(`Submitted nettskjema: ${submissionId}`);
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
     try {  
-        //const submissionId = extractSubmissionId(submissionId); //no need anymore  
-        //const zammadTicket = 'test_mayas_app [Ticket#4824171]';
-        //const zammadTicket = '[Ticket#4824171]';  //put in the email subject
+        //const submissionId = extractSubmissionId(submissionId); 
         if (isTicket) {
             const tokenNettskjema = await fetchToken();
             logger.info("token for nettskjema is fetched successfully");
@@ -108,7 +109,7 @@ app.post('/webhook', async (req, res) => {
             const requestOptions = await getRequestOptions();
             //const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, mayaHeaders);
             const {nameCustodian, surnameCustodian, emailCustodian} = await contactInfoKG(queryID, datasetID, requestOptions);
-            logger.info("successfully fetched contact info from KG");
+            logger.info("successfully fetched data custodian contact info from KG");
 
             //from submitted nettskjema
             const respondentName = submissionData['submissionMetadata']['person']['name'];
@@ -131,27 +132,27 @@ app.post('/webhook', async (req, res) => {
             const purposeAccess = purpose['textAnswer'];
         
             if (emailCustodian['email'].length>0){
-                //replace this function by zammad service
                 const testTicketId = 24211; //my test ticket in zammad
-                //replace my test ticket by actuall ticketId
-                sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, testTicketId, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no');
-                //sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, ticketId, nameCustodian, surnameCustodian, emailCustodian['email']);
-                //in prod: replace my uio email by the email of the custodian: emailCustodian['email']
+                sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, datasetID, testTicketId, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no');
+                //sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, datasetID, ticketId, nameCustodian, surnameCustodian, emailCustodian['email']);
+                //in prod: replace my uio email by the email of the custodian: emailCustodian['email']; replace my test ticket by actuall ticketId of the request
+                //reply to the person that requested data
+                sendReply(contactPersonName, 'maya.kobchenko@medisin.uio.no', dataTitle, datasetID, ticketId);
+                //sendReply(contactPersonName, recipientEmail, dataTitle, datasetID, ticketId); //in prod
             } else {
                 throw new Error('Custodian of the dataset did not provide contact information.');
             }
         } else {
-            logger.info('ticket is not relevant');
+            logger.info('incoming ticket is not related to data request');
         }
     } catch (error) {
         logger.error(`Something is not working:`, error);
         const logFilePath = path.resolve(__dirname, '../restrictedaccess.log');
-        const emailSupport = 'maya.kobchenko@medisin.uio.no'; //forward notification to my email
-        //const testTicketSubject = 'test_mayas_app [Ticket#4824171]'; //my test ticket
-        //const submissionId = "33139391";//for testing
-        const testTicketId = 24211; //my test ticket in zammad
-        await errorNotificationZammad(ticketId, testTicketId, submissionId, logFilePath, emailSupport);
-        //add here sending emails to my email notifying that something is not working 
+        const fileContent = fs.readFileSync(logFilePath, { encoding: 'utf8' });
+        const base64Data = Buffer.from(fileContent).toString('base64');
+        const emailSupport = 'maya.kobchenko@medisin.uio.no'; 
+        const supportTicketId = 24211; //test_mayas_app [Ticket#4824171]
+        await errorNotificationZammad(ticketId, supportTicketId, submissionId, base64Data, emailSupport);
     }; 
 });
 

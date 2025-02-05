@@ -94,7 +94,6 @@ app.post('/webhook', async (req, res) => {
     console.log(typeof refNumber);
     const submissionId = parseInt(refNumber, 10);
     logger.info(`Zammad ticket number: ${ticketNumber}, is it data access request: ${isTicket}`);
-    logger.info(`Submitted nettskjema: ${submissionId}`);
     //we created a query manually in KG editor named = fetch_data_custodian_info
     const queryID = 'de7e79ae-5b67-47bf-b8b0-8c4fa830348e';
     try {  
@@ -134,14 +133,14 @@ app.post('/webhook', async (req, res) => {
             const purposeAccess = purpose['textAnswer'];
         
             if (emailCustodian['email'].length>0){
-                const testTicketId = 24211; //my test ticket in zammad
-                sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, datasetID, testTicketId, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no');
-                //sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, datasetID, ticketId, nameCustodian, surnameCustodian, emailCustodian['email']);
+                //const testTicketId = 24211; //my test ticket in zammad
+                //sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, datasetID, testTicketId, nameCustodian, surnameCustodian, 'maya.kobchenko@medisin.uio.no');
+                sendEmailOnWebhookZammad(respondentName, respondentEmail, positionContact, instituionCorrespondent, departm, purposeAccess, dataTitle, datasetID, ticketId, nameCustodian, surnameCustodian, emailCustodian['email']);
                 //in prod: replace my uio email by the email of the custodian: emailCustodian['email']; replace my test ticket by actuall ticketId of the request
                 //reply to the person that requested data
-                //set to internal (locked) if you want to hide the thread
-                sendReply(respondentName, 'maya.kobchenko@medisin.uio.no', dataTitle, datasetID, testTicketId);
-                //sendReply(respondentName, respondentEmail, dataTitle, datasetID, ticketId); //in prod
+                //set to internal true (locked) if you want to hide the thread
+                //sendReply(respondentName, 'maya.kobchenko@medisin.uio.no', dataTitle, datasetID, testTicketId);//for testing
+                sendReply(respondentName, respondentEmail, dataTitle, datasetID, ticketId); //in prod
             } else {
                 throw new Error('Custodian of the dataset did not provide contact information.');
             }

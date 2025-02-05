@@ -12,7 +12,7 @@ export function emailHtmlText(contactPersonName, recipientEmail, positionContact
         <p>https://search.kg.ebrains.eu/instances/${dataset_uuid}</p>
         <p><br></p>
         <p>Requester: ${contactPersonName}, ${positionContact}, ${departm}, ${institution}, email: ${recipientEmail}<p/>
-
+        <p><br></p>
         <p>Purpose of access: ${purposeAccess}</p>
         <p><br></p>
         <p>We provide you with this information so that you can get in touch with the person who has requested access, 

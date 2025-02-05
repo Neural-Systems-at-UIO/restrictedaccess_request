@@ -7,7 +7,7 @@ export function replyEmailHtml(contactPersonName, dataTitle, dataset_uuid) {
     <body>
     <div>
         <p>Dear ${contactPersonName},</p>
-        <p></p>
+        <p><br></p>
 
         <p>We have received your data access request for the following human dataset published on EBRAINS:</p>
         <p>${dataTitle}.</p>
@@ -15,7 +15,7 @@ export function replyEmailHtml(contactPersonName, dataTitle, dataset_uuid) {
 
         <p>Thank you for your interest in these data. We have forwarded your request to the data custodian, so that they can get in touch with you and agree on the conditions for sharing the data.</p>
         
-        <p></p>
+        <p><br></p>
         <p>Best regards,<p/>
         <p>---<br>
         EBRAINS Data Curation Support <br>

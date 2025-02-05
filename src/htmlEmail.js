@@ -5,7 +5,7 @@ export function emailHtmlText(contactPersonName, recipientEmail, positionContact
     <body>
     <div>
         <p>Dear ${nameCustodian} ${surnameCustodian},</p>
-        <p></p>
+        <p><br></p>
 
         <p>We have received a data access request for the following human dataset published on EBRAINS under your custodianship:</p>
         <p>${dataTitle}.</p>
@@ -25,7 +25,7 @@ export function emailHtmlText(contactPersonName, recipientEmail, positionContact
         
         <p>Please do not hesitate to contact us, if you have any questions.<p/>
         
-        <p></p>
+        <p><br></p>
         <p>Best regards,<p/>
         <p>---<br>
         EBRAINS Data Curation Support <br>

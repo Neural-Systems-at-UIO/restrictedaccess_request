@@ -126,7 +126,7 @@ app.post('/webhook', async (req, res) => {
             const positionCode = position['answerOptionIds'];//people write several positions
             const posContact = [];
             for (const code of positionCode) {
-                const position = await fetchPosition(extractedSubmissionId, tokenNettskjema, code);
+                const position = await fetchPosition(submissionId, tokenNettskjema, code);
                 posContact.push(position);     
             }
             const positionContact = posContact.join(', ');

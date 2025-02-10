@@ -25,17 +25,19 @@ export async function zammadTicket (ticketId) {
         const ticketNumber = data.number;
         const isTicket = dataTitle.includes(searchTitle);
         let refNumber = null;
+        let submissionId = 0;
         const regex = /(?<=Ref\.?\s?)\d+/;
         //const regex = /\(Ref\.?\s*(\d+)\)/;
-        const match = dataTitle.match(regex);
         if (isTicket) {
+            const match = dataTitle.match(regex);
             refNumber = match[0];
+            submissionId = parseInt(refNumber, 10);
             //refNumber = match[1];
             logger.info(`Submitted nettskjema id: ${refNumber}`);
         } else {
-            logger.info('Could not find nettskjema id in the ticket');
+            logger.info('No nettskjema id in the ticket');
         }
-        return {isTicket, ticketNumber, refNumber};
+        return {isTicket, ticketNumber, submissionId};
     } catch (error) {
         throw new Error(`Error fetching nettskjema id from zammad ticket: ${error.message}`);
     }

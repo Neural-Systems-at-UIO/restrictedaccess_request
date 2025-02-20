@@ -31,7 +31,6 @@ export function emailHtmlText(contactPersonName, recipientEmail, positionContact
         EBRAINS Data Curation Support <br>
         curation-support@ebrains.eu <br>
         https://www.ebrains.eu/ <br>
-        https://www.humanbrainproject.eu/
         <p/>
     </div>
     </body>

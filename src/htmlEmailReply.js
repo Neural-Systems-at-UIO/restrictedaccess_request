@@ -21,7 +21,6 @@ export function replyEmailHtml(contactPersonName, dataTitle, dataset_uuid) {
         EBRAINS Data Curation Support <br>
         curation-support@ebrains.eu <br>
         https://www.ebrains.eu/ <br>
-        https://www.humanbrainproject.eu/
         <p/>
     </div>
     </body>

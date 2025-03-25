@@ -149,4 +149,4 @@ My personal token 'get_ticket_info' is used for this app, no expiration date set
 Redeployment steps:
 
 1. delete deployment
-2.
+2. docker username and passwword - harbor

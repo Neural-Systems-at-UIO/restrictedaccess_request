@@ -135,3 +135,18 @@ http://localhost:4000/webhook?trials=testwebhook
 
 emails are sent via Zammad api
 https://docs.zammad.org/en/latest/api/ticket/articles.html#create
+
+If you have to redeploy, don't delete the namespace. Just what you created/deployed there ( deployments, secrets, services etc).
+
+Gitlab issue: https://gitlab.ebrains.eu/kanban/curators/ebrains-curation-team/-/issues/163#note_1144130
+
+To create clients for accessing netttskjema: https://authorization.nettskjema.no/client
+
+to get token to access Zammad, log in to Zammad, generate token with permissions : ticket.agent, ticket.customer
+
+My personal token 'get_ticket_info' is used for this app, no expiration date set.
+
+Redeployment steps:
+
+1. delete deployment
+2.

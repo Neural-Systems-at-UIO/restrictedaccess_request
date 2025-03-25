@@ -150,7 +150,7 @@ Redeployment steps:
 
 1. delete deployment
 2. update docker/harbor username and password if needed
-3. create deployment
+3. create deployment, env varibles
 4. push chnages from github repo
 5. check the image name yaml file
 

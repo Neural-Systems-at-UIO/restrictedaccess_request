@@ -149,4 +149,9 @@ My personal token 'get_ticket_info' is used for this app, no expiration date set
 Redeployment steps:
 
 1. delete deployment
-2. docker username and passwword - harbor
+2. update docker/harbor username and password if needed
+3. create deployment
+4. push chnages from github repo
+5. check the image name yaml file
+
+docker pull docker-registry.ebrains.eu/ebrains-data-curation/restrictedaccess@sha256:c1931c2eda30687b9322a1f252eaa785ce680afeff27d3bff5ab6f344e199264
